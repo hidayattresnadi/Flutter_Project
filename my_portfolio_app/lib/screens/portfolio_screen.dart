@@ -41,92 +41,44 @@ final List<Project> projects = [
   ),
 ];
 
-Widget buildProjectCard(Project project) {
-  return Align(
-    alignment: Alignment.topCenter,
-    child: SizedBox(
-      height: 340,
-      child: Card(
-        elevation: 4,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Image.asset(
+Widget buildProjectCard(BuildContext context, Project project) {
+  return Card(
+    elevation: 4,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    child: Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.asset(
               project.imagePath,
+              height: 300,
               width: double.infinity,
-              height: 130,
               fit: BoxFit.cover,
             ),
-            const SizedBox(height: 14),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  Text(
-                    project.title,
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Icon(Icons.description, color: Colors.blue, size: 17),
-                      const SizedBox(width: 10),
-                      Text(
-                        "Description:",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 10),
-                  Text(
-                    project.description,
-                    style: TextStyle(fontSize: 16),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.developer_board_outlined,
-                        color: Colors.blue,
-                        size: 17,
-                      ),
-                      const SizedBox(width: 10),
-                      Text(
-                        "Tech:",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    project.technologies,
-                    style: TextStyle(fontSize: 16),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            project.title,
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            project.description,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Tech: ${project.technologies}',
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: Colors.grey[700]),
+          ),
+        ],
       ),
     ),
   );
@@ -138,22 +90,6 @@ class PortfolioScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isLandscape =
-        MediaQuery.of(context).orientation == Orientation.landscape;
-
-    Widget content = GridView.builder(
-      padding: const EdgeInsets.all(10.0),
-      itemCount: projects.length,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: isLandscape ? 3 : 2,
-        crossAxisSpacing: 10.0,
-        mainAxisSpacing: 10.0,
-        childAspectRatio: isLandscape ? 0.75 : 0.5,
-      ),
-      itemBuilder: (context, index) {
-        return buildProjectCard(projects[index]);
-      },
-    );
     return withScaffold == true
         ? Scaffold(
             backgroundColor: Colors.white,
@@ -162,8 +98,30 @@ class PortfolioScreen extends StatelessWidget {
               backgroundColor: Theme.of(context).colorScheme.primary,
               foregroundColor: Colors.white,
             ),
-            body: content,
+            body: buildPortfolioBody(context: context, project: projects),
           )
-        : content;
+        : buildPortfolioBody(context: context, project: projects);
   }
+}
+
+Widget buildPortfolioBody({context, project}) {
+  return SingleChildScrollView(
+    padding: const EdgeInsets.all(16),
+    child: Column(
+      children: projects
+          .map(
+            (project) => Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 600),
+                  child: buildProjectCard(context, project),
+                ),
+              ),
+            ),
+          )
+          .toList(),
+    ),
+  );
 }
