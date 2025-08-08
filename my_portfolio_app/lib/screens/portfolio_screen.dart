@@ -91,17 +91,21 @@ class PortfolioScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return withScaffold == true
-        ? Scaffold(
-            backgroundColor: Colors.white,
-            appBar: AppBar(
-              title: Text("My Portfolio"),
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              foregroundColor: Colors.white,
-            ),
-            body: buildPortfolioBody(context: context, project: projects),
-          )
+        ? portFolioScaffold(context)
         : buildPortfolioBody(context: context, project: projects);
   }
+}
+
+Widget portFolioScaffold(context) {
+  return Scaffold(
+    backgroundColor: Colors.white,
+    appBar: AppBar(
+      title: Text("My Portfolio"),
+      backgroundColor: Theme.of(context).colorScheme.primary,
+      foregroundColor: Colors.white,
+    ),
+    body: buildPortfolioBody(context: context, project: projects),
+  );
 }
 
 Widget buildPortfolioBody({context, project}) {
