@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:my_portfolio_app/provider/profile_provider.dart';
+import 'package:provider/provider.dart';
 
-String name = "Muhammad Hidayat Tresnadi";
-String profession = "Mobile Developer";
-String email = "john.doe@email.com";
-String phone = "+62 812-3456-7890";
-String address = "Jakarta, Indonesia";
 String office = "Tech Company";
 
 class ContactScreen extends StatelessWidget {
@@ -12,6 +9,7 @@ class ContactScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final profile = context.watch<ProfileProvider>().profile;
     return SafeArea(
       child: SingleChildScrollView(
         child: Padding(
@@ -20,10 +18,10 @@ class ContactScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              buildProfileHeader(),
+              buildProfileHeader(profile.name, profile.profession),
               Divider(height: 24),
               SizedBox(height: MediaQuery.of(context).size.height * 0.03),
-              buildProfileInfo(),
+              buildProfileInfo(profile.email, profile.phone, profile.address),
             ],
           ),
         ),
@@ -32,7 +30,7 @@ class ContactScreen extends StatelessWidget {
   }
 }
 
-Widget buildProfileHeader() {
+Widget buildProfileHeader(String name, String profession) {
   return Row(
     children: [
       CircleAvatar(
@@ -65,7 +63,7 @@ Widget buildProfileHeader() {
   );
 }
 
-Widget buildProfileInfo() {
+Widget buildProfileInfo(String email, String phone, String address) {
   return Column(
     children: [
       buildPaddingContact(icon: Icons.email, info: email, color: Colors.blue),

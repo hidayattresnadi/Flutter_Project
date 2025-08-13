@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:my_portfolio_app/provider/profile_provider.dart';
 import 'package:my_portfolio_app/screens/contact_screen.dart';
+import 'package:my_portfolio_app/screens/edit_profile_screen.dart';
 import 'package:my_portfolio_app/screens/portfolio_screen.dart';
+import 'package:provider/provider.dart';
 import 'screens/profile_screen.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(create: (_) => ProfileProvider(), child: MyApp()),
+  );
 }
 
 final PageController _pageController = PageController();
@@ -59,7 +64,21 @@ class _MainScreenState extends State<MainScreen> {
           IconButton(
             icon: Icon(Icons.edit),
             onPressed: () {
+              final profile = context.read<ProfileProvider>().profile;
               // Action for edit button
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => EditProfileScreen(
+                    name: profile.name,
+                    profession: profile.profession,
+                    email: profile.email,
+                    phone: profile.phone,
+                    address: profile.address,
+                    bio: profile.bio,
+                  ),
+                ),
+              );
             },
           ),
         ],

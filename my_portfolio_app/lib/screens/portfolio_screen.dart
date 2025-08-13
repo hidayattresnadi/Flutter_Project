@@ -76,7 +76,7 @@ Widget buildProjectCard(BuildContext context, Project project) {
             'Tech: ${project.technologies}',
             style: Theme.of(
               context,
-            ).textTheme.bodySmall?.copyWith(color: Colors.grey[700]),
+            ).textTheme.bodyMedium?.copyWith(color: Colors.grey[700]),
           ),
         ],
       ),
@@ -109,23 +109,41 @@ Widget portFolioScaffold(context) {
 }
 
 Widget buildPortfolioBody({context, project}) {
-  return SingleChildScrollView(
-    padding: const EdgeInsets.all(16),
-    child: Column(
-      children: projects
-          .map(
-            (project) => Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 600),
-                  child: buildProjectCard(context, project),
-                ),
-              ),
-            ),
-          )
-          .toList(),
-    ),
+  return LayoutBuilder(
+    builder: (context, constraints) {
+      final screenWidth = constraints.maxWidth;
+      // final crossAxisCount = screenWidth < 600 ? 1 : 2;
+      int crossAxisCount;
+      if (screenWidth < 600) {
+        crossAxisCount = 1; // HP
+      } else if (screenWidth < 1024) {
+        crossAxisCount = 2; // Tablet
+      } else {
+        crossAxisCount = 3; // Desktop
+      }
+      final spacing = 16 * (crossAxisCount - 1);
+      final itemWidth = (screenWidth - spacing) / crossAxisCount;
+      final itemHeight = 501.0; // tinggi fix
+      final childAspectRatio = itemWidth / itemHeight;
+
+      return SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: projects.length,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 50,
+            childAspectRatio: childAspectRatio,
+          ),
+          itemBuilder: (context, index) {
+            final project = projects[index];
+            return buildProjectCard(context, project);
+          },
+        ),
+      );
+    },
   );
 }

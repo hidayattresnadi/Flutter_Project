@@ -36,6 +36,8 @@ dependencies:
   cupertino_icons: ^1.0.8
   # The "google_fonts" package below allows you to use a wide range of fonts
   google_fonts: ^6.1.0
+  provider: ^6.1.1
+  fluttertoast: ^8.2.4
 
 dev_dependencies:
   flutter_test:

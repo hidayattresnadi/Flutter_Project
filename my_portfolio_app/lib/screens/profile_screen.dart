@@ -1,19 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:my_portfolio_app/provider/profile_provider.dart';
 import 'package:my_portfolio_app/screens/portfolio_screen.dart';
-
-String name = "Muhammad Hidayat Tresnadi";
-String profession = "Mobile Developer";
-String email = "john.doe@email.com";
-String phone = "+62 812-3456-7890";
-String address = "Jakarta, Indonesia";
-String bio =
-    "Passionate mobile developer with 3+ years experience in Flutter and React Native. Love creating beautiful and functional mobile applications.";
+import 'package:provider/provider.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final profile = context.watch<ProfileProvider>().profile;
     return SafeArea(
       child: SingleChildScrollView(
         child: Padding(
@@ -21,13 +16,13 @@ class ProfileScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              buildProfileHeader(),
+              buildProfileHeader(profile.name, profile.profession),
               Divider(height: 24),
               buildMyPortfolio(context),
               SizedBox(height: 30),
-              buildProfileInfo(),
+              buildProfileInfo(profile.email, profile.phone, profile.address),
               SizedBox(height: 30),
-              buildProfileBio(),
+              buildProfileBio(profile.bio),
               SizedBox(height: 30),
             ],
           ),
@@ -37,7 +32,7 @@ class ProfileScreen extends StatelessWidget {
   }
 }
 
-Widget buildProfileHeader() {
+Widget buildProfileHeader(String name, String profession) {
   return Row(
     children: [
       CircleAvatar(
@@ -113,7 +108,7 @@ Widget buildMyPortfolio(BuildContext context) {
   );
 }
 
-Widget buildProfileInfo() {
+Widget buildProfileInfo(String email, String phone, String address) {
   return Card(
     color: Colors.black,
     child: Column(
@@ -161,11 +156,11 @@ Widget buildProfileInfo() {
   );
 }
 
-Widget buildProfileBio() {
+Widget buildProfileBio(String bio) {
   return Card(
     color: Colors.black,
     child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
           padding: EdgeInsets.only(
@@ -190,19 +185,7 @@ Widget buildProfileBio() {
             right: 25.0,
             bottom: 15.0,
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Column(
-                children: [
-                  Text(
-                    bio,
-                    style: TextStyle(fontSize: 20, color: Colors.white),
-                  ),
-                ],
-              ),
-            ],
-          ),
+          child: Text(bio, style: TextStyle(fontSize: 20, color: Colors.white)),
         ),
       ],
     ),
