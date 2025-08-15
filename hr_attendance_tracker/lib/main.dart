@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hr_attendance_tracker/providers/attendance_record_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:hr_attendance_tracker/screens/attendance_history.dart';
 import 'package:hr_attendance_tracker/screens/home_screen.dart';
 import 'package:hr_attendance_tracker/screens/profile_screen.dart';
 import 'package:intl/intl.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => AttendanceRecordProvider(),
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -89,6 +96,8 @@ class _MainScreenState extends State<MainScreen> {
           highlightColor: Colors.transparent,
         ),
         child: BottomNavigationBar(
+          type:
+              BottomNavigationBarType.fixed, // biar semua item tetap lebar sama
           currentIndex: _currentIndex,
           backgroundColor: Color(0xFF004966),
           selectedItemColor: Colors.white,

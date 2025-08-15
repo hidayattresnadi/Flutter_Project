@@ -1,81 +1,10 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hr_attendance_tracker/models/attendance_record_model.dart';
+import 'package:hr_attendance_tracker/providers/attendance_record_provider.dart';
 import 'package:intl/intl.dart';
-
-class AttendanceRecord {
-  final String date;
-  final String day;
-  final String checkIn;
-  final String checkOut;
-  final String status;
-
-  AttendanceRecord({
-    required this.date,
-    required this.day,
-    required this.checkIn,
-    required this.checkOut,
-    required this.status,
-  });
-}
-
-final List<AttendanceRecord> dummyRecords = [
-  // AttendanceRecord(
-  //   date: 'date',
-  //   day: '',
-  //   checkIn: 'check in',
-  //   checkOut: 'check out',
-  //   status: 'status',
-  // ),
-  AttendanceRecord(
-    date: 'Aug 1, 2022',
-    day: 'Monday',
-    checkIn: '08:00',
-    checkOut: '17:00',
-    status: 'Present',
-  ),
-  AttendanceRecord(
-    date: 'Aug 2, 2022',
-    day: 'Monday',
-    checkIn: '08:05',
-    checkOut: '17:10',
-    status: 'Present',
-  ),
-  AttendanceRecord(
-    date: 'Aug 3, 2022',
-    day: 'Monday',
-    checkIn: '08:15',
-    checkOut: '16:50',
-    status: 'Present',
-  ),
-  AttendanceRecord(
-    date: 'Aug 4, 2022',
-    day: 'Monday',
-    checkIn: '-',
-    checkOut: '-',
-    status: 'Absent',
-  ),
-  AttendanceRecord(
-    date: 'Aug 5, 2022',
-    day: 'Monday',
-    checkIn: '08:10',
-    checkOut: '17:00',
-    status: 'Present',
-  ),
-  AttendanceRecord(
-    date: 'Aug 6, 2022',
-    day: 'Monday',
-    checkIn: '08:20',
-    checkOut: '17:30',
-    status: 'Present',
-  ),
-  AttendanceRecord(
-    date: 'Aug 7, 2022',
-    day: 'Monday',
-    checkIn: '-',
-    checkOut: '-',
-    status: 'Absent',
-  ),
-];
+import 'package:provider/provider.dart';
 
 class AttendanceItem extends StatelessWidget {
   final AttendanceRecord record;
@@ -87,37 +16,43 @@ class AttendanceItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    double fontSize = screenWidth < 390 ? 12 : 14;
+    final AutoSizeGroup dateGroup = AutoSizeGroup();
+    final AutoSizeGroup dayGroup = AutoSizeGroup();
+    final AutoSizeGroup inTimeGroup = AutoSizeGroup();
+    final AutoSizeGroup statusGroup = AutoSizeGroup();
+
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 8),
       title: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // DATE (column supaya bisa ada date + day)
+          // DATE
           Expanded(
             flex: 1,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              // di Row
               crossAxisAlignment: CrossAxisAlignment.center,
-
               children: [
-                Text(
+                AutoSizeText(
                   record.date,
-                  style: TextStyle(
-                    fontSize: record.day.isNotEmpty ? 13 : 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  group: dateGroup, // Pisah group untuk date
+                  minFontSize: 9,
+                  maxFontSize: 13,
+                  maxLines: 1,
+                  style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
                 ),
-                if (record.day.isNotEmpty) const SizedBox(height: 4),
-                if (record.day.isNotEmpty)
-                  Text(record.day, style: const TextStyle(fontSize: 12)),
+                const SizedBox(height: 4),
+                AutoSizeText(
+                  record.day,
+                  group: dayGroup, // Pisah group untuk day
+                  minFontSize: 10,
+                  maxFontSize: 12,
+                  style: GoogleFonts.poppins(),
+                ),
               ],
             ),
           ),
 
-          // spacing antar kolom (opsional)
           const SizedBox(width: 8),
 
           // CHECK IN
@@ -125,22 +60,18 @@ class AttendanceItem extends StatelessWidget {
             flex: 1,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              // di Row
               crossAxisAlignment: CrossAxisAlignment.center,
-
               children: [
-                Text(
+                AutoSizeText(
                   record.checkIn,
+                  group: inTimeGroup,
+                  minFontSize: 10,
+                  maxFontSize: 13,
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontWeight: record.day.isNotEmpty
-                        ? FontWeight.normal
-                        : FontWeight.bold,
-                  ),
+                  style: GoogleFonts.poppins(),
                 ),
-                if (record.day.isNotEmpty) const SizedBox(height: 4),
-                if (record.day.isNotEmpty)
-                  Text('', style: const TextStyle(fontSize: 12)),
+                const SizedBox(height: 4),
+                const SizedBox(height: 16), // Placeholder biar sejajar
               ],
             ),
           ),
@@ -152,36 +83,31 @@ class AttendanceItem extends StatelessWidget {
             flex: 1,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              // di Row
               crossAxisAlignment: CrossAxisAlignment.center,
-
               children: [
-                Text(
+                AutoSizeText(
                   record.checkOut,
+                  group: inTimeGroup,
+                  minFontSize: 10,
+                  maxFontSize: 13,
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontWeight: record.day.isNotEmpty
-                        ? FontWeight.normal
-                        : FontWeight.bold,
-                  ),
+                  style: GoogleFonts.poppins(fontWeight: FontWeight.normal),
                 ),
-                if (record.day.isNotEmpty) const SizedBox(height: 4),
-                if (record.day.isNotEmpty)
-                  Text('', style: const TextStyle(fontSize: 12)),
+                const SizedBox(height: 4),
+                const SizedBox(height: 16),
               ],
             ),
           ),
 
           const SizedBox(width: 8),
 
-          // STATUS (SELALU Column supaya struktur sama di header & row)
+          // STATUS
           Expanded(
             flex: 1,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                if (record.status !=
-                    'status') // kalau bukan header, tampilkan icon
+                if (record.status != 'status')
                   Icon(
                     record.status == 'Present'
                         ? Icons.check_circle
@@ -191,15 +117,13 @@ class AttendanceItem extends StatelessWidget {
                         ? Colors.green
                         : Colors.red,
                   ),
-                if (record.status != 'status') const SizedBox(height: 4),
-                Text(
+                const SizedBox(height: 4),
+                AutoSizeText(
                   record.status,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: record.day.isNotEmpty
-                        ? FontWeight.normal
-                        : FontWeight.bold,
-                  ),
+                  group: statusGroup, // Pisah group untuk status
+                  minFontSize: 10,
+                  maxFontSize: 16,
+                  style: GoogleFonts.poppins(fontWeight: FontWeight.normal),
                 ),
               ],
             ),
@@ -216,13 +140,13 @@ class AttendanceHistoryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget content = attendanceScreenBody();
+    Widget content = attendanceScreenBody(context);
 
-    return withScaffold == true ? attendanceScreenScaffold() : content;
+    return withScaffold == true ? attendanceScreenScaffold(context) : content;
   }
 }
 
-Widget attendanceScreenScaffold() {
+Widget attendanceScreenScaffold(BuildContext context) {
   return Scaffold(
     appBar: AppBar(
       backgroundColor: Colors.amber.shade900,
@@ -250,7 +174,7 @@ Widget attendanceScreenScaffold() {
       centerTitle: false,
       elevation: 0,
     ),
-    body: attendanceScreenBody(),
+    body: attendanceScreenBody(context),
   );
 }
 
@@ -279,7 +203,11 @@ Widget _buildSummaryItem(String label, String count) {
   );
 }
 
-Widget attendanceScreenBody() {
+Widget attendanceScreenBody(BuildContext context) {
+  final listAttendanceRecords = context
+      .watch<AttendanceRecordProvider>()
+      .attendanceRecords;
+
   return SingleChildScrollView(
     padding: const EdgeInsets.all(20),
     child: Column(
@@ -374,9 +302,9 @@ Widget attendanceScreenBody() {
               ListView.separated(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                itemCount: dummyRecords.length,
+                itemCount: listAttendanceRecords.length,
                 itemBuilder: (context, index) {
-                  return AttendanceItem(record: dummyRecords[index]);
+                  return AttendanceItem(record: listAttendanceRecords[index]);
                 },
                 separatorBuilder: (context, index) {
                   return const Divider(
