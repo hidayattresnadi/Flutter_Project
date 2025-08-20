@@ -41,4 +41,35 @@ class AttendanceRecord {
 
     return '$hours:${minutes.toString().padLeft(2, '0')}';
   }
+
+  double get workProgress {
+    final format = DateFormat('HH:mm');
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    // jam checkin hari ini
+    final inTime = format.parse(checkIn.trim());
+    final checkInTime = DateTime(
+      today.year,
+      today.month,
+      today.day,
+      inTime.hour,
+      inTime.minute,
+    );
+
+    // jam selesai kerja (8 jam)
+    final endTime = checkInTime.add(Duration(hours: 8));
+
+    // total durasi kerja
+    final totalWork = endTime.difference(checkInTime).inMinutes;
+
+    // sudah bekerja berapa menit
+    final worked = now.difference(checkInTime).inMinutes;
+
+    // progress antara 0.0 - 1.0
+    final progress = worked / totalWork;
+
+    // biar ga lebih dari 1.0 atau kurang dari 0.0
+    return progress.clamp(0.0, 1.0);
+  }
 }

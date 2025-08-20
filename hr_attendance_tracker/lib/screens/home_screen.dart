@@ -37,39 +37,39 @@ class HomeScreen extends StatelessWidget {
             // ===== Greeting & Profile =====
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Text(
-                          'Good morning, ',
-                          style: TextStyle(fontSize: 20),
-                        ),
-                        const Icon(
-                          Icons.waving_hand_rounded,
-                          color: Colors.yellow,
-                        ),
-                      ],
-                    ),
-                    const Text(
-                      'Dayat.',
-                      style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: const [
+                          Text(
+                            'Good morning, ',
+                            style: TextStyle(fontSize: 20),
+                          ),
+                          Icon(Icons.waving_hand_rounded, color: Colors.yellow),
+                        ],
                       ),
-                    ),
-                    Text(
-                      today == listAttendanceRecords.last.date
-                          ? 'Have a great day at work!'
-                          : 'Begin another great day by clocking in.',
-                      style: TextStyle(
-                        fontSize: screenWidth < 400 ? 12 : 15, // pakai ? :
-                        fontWeight: FontWeight.bold,
+                      const Text(
+                        'Dayat.',
+                        style: TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                  ],
+                      Text(
+                        today == listAttendanceRecords.last.date
+                            ? 'Have a great day at work!'
+                            : 'Begin another great day by clocking in.',
+                        style: TextStyle(
+                          fontSize: screenWidth < 400 ? 12 : 15,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 const CircleAvatar(
                   radius: 45,
@@ -173,7 +173,7 @@ Widget buildListMenus() {
       }
       final spacing = 16 * (crossAxisCount - 1);
       final itemWidth = (screenWidth - spacing) / crossAxisCount;
-      final itemHeight = 110; // tinggi fix
+      final itemHeight = 120; // tinggi fix
       final childAspectRatio = itemWidth / itemHeight;
 
       return SingleChildScrollView(
@@ -224,10 +224,11 @@ Widget buildMenuCard(BuildContext context, Menu menu) {
           group: autosizeGroup,
           minFontSize: 12,
           maxFontSize: 20,
-          maxLines: 1,
+          maxLines: 2,
           style: Theme.of(
             context,
           ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          textAlign: TextAlign.center,
         ),
         const SizedBox(height: 8),
         Icon(menu.icon, color: Colors.blue),

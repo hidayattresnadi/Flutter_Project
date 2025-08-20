@@ -1,6 +1,9 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hr_attendance_tracker/providers/attendance_record_provider.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class AttendanceCard extends StatelessWidget {
   final String dateText;
@@ -30,6 +33,10 @@ class AttendanceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final listAttendanceRecords = context
+        .watch<AttendanceRecordProvider>()
+        .attendanceRecords;
+    String today = DateFormat('MMM d, yyyy').format(DateTime.now());
     return Card(
       child: Container(
         decoration: BoxDecoration(
@@ -103,8 +110,17 @@ class AttendanceCard extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
+            const SizedBox(height: 20),
+            LinearProgressIndicator(
+              value: today != listAttendanceRecords.last.date
+                  ? 0
+                  : listAttendanceRecords.last.workProgress,
+              minHeight: 10,
+              backgroundColor: Colors.grey[300],
+              color: Colors.blue,
+            ),
             if (showButton) ...[
-              const SizedBox(height: 10),
+              const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(

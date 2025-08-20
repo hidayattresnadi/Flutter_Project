@@ -19,7 +19,7 @@ class AttendanceItem extends StatelessWidget {
     final AutoSizeGroup dateGroup = AutoSizeGroup();
     final AutoSizeGroup dayGroup = AutoSizeGroup();
     final AutoSizeGroup inTimeGroup = AutoSizeGroup();
-    final AutoSizeGroup statusGroup = AutoSizeGroup();
+    // final AutoSizeGroup statusGroup = AutoSizeGroup();
 
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 8),
@@ -28,7 +28,7 @@ class AttendanceItem extends StatelessWidget {
         children: [
           // DATE
           Expanded(
-            flex: 1,
+            flex: 2,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -36,7 +36,7 @@ class AttendanceItem extends StatelessWidget {
                 AutoSizeText(
                   record.date,
                   group: dateGroup, // Pisah group untuk date
-                  minFontSize: 9,
+                  minFontSize: 12,
                   maxFontSize: 13,
                   maxLines: 1,
                   style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
@@ -120,7 +120,7 @@ class AttendanceItem extends StatelessWidget {
                 const SizedBox(height: 4),
                 AutoSizeText(
                   record.status,
-                  group: statusGroup, // Pisah group untuk status
+                  group: dateGroup, // Pisah group untuk status
                   minFontSize: 10,
                   maxFontSize: 16,
                   style: GoogleFonts.poppins(fontWeight: FontWeight.normal),
@@ -262,7 +262,7 @@ Widget attendanceScreenBody(BuildContext context) {
                 child: Row(
                   children: const [
                     Expanded(
-                      flex: 1,
+                      flex: 2,
                       child: Text(
                         'Date',
                         style: TextStyle(fontWeight: FontWeight.bold),
