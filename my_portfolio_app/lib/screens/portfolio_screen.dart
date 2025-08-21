@@ -1,45 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
-
-class Project {
-  final String title;
-  final String description;
-  final String technologies;
-  final String imagePath;
-
-  Project({
-    required this.title,
-    required this.description,
-    required this.technologies,
-    required this.imagePath,
-  });
-}
-
-final List<Project> projects = [
-  Project(
-    title: 'Portfolio App',
-    description: 'A personal app to showcase my projects.',
-    technologies: 'Flutter, Firebase',
-    imagePath: 'assets/portfolio.png',
-  ),
-  Project(
-    title: 'Chat App',
-    description: 'A real-time messaging app.',
-    technologies: 'Flutter, Node.js',
-    imagePath: 'assets/chat.jpg',
-  ),
-  Project(
-    title: 'E-commerce UI',
-    description: 'Front-end design for e-commerce.',
-    technologies: 'Flutter',
-    imagePath: 'assets/ecommerce.jpg',
-  ),
-  Project(
-    title: 'Smart Home App',
-    description: 'Mobile app to control smart home devices remotely.',
-    technologies: 'Flutter, Firebase',
-    imagePath: 'assets/smarthome.jpg',
-  ),
-];
+import 'package:my_portfolio_app/models/project_model.dart';
+import 'package:my_portfolio_app/provider/project_provider.dart';
+import 'package:my_portfolio_app/screens/add_portfolio_form.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 Widget buildProjectCard(BuildContext context, Project project) {
   return Card(
@@ -52,9 +19,9 @@ Widget buildProjectCard(BuildContext context, Project project) {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
-            child: Image.asset(
-              project.imagePath,
-              height: 300,
+            child: Image.file(
+              File(project.imagePath!),
+              height: 200,
               width: double.infinity,
               fit: BoxFit.cover,
             ),
@@ -62,22 +29,66 @@ Widget buildProjectCard(BuildContext context, Project project) {
           const SizedBox(height: 12),
           Text(
             project.title,
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            style: GoogleFonts.poppins(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 8),
+          Text(
+            'Category: ${project.category}',
+            style: GoogleFonts.roboto(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey[700],
+            ),
+          ),
+          Text(
+            'Completed on: ${project.completionDate!.toLocal().toString().split(' ')[0]}',
+            style: GoogleFonts.roboto(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey[700],
+            ),
+          ),
+          const SizedBox(height: 16),
           Text(
             project.description,
-            style: Theme.of(context).textTheme.bodyMedium,
+            style: GoogleFonts.roboto(
+              fontSize: 18,
+              height: 1.4,
+              fontWeight: FontWeight.w600, // lebih tebal dari default
+              color: Colors.black87,
+            ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 16),
           Text(
             'Tech: ${project.technologies}',
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(color: Colors.grey[700]),
+            style: GoogleFonts.roboto(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey[700],
+            ),
           ),
+          const SizedBox(height: 16),
+          if (project.link != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: GestureDetector(
+                onTap: () {
+                  // Bisa tambahkan logic buka URL
+                },
+                child: Text(
+                  project.link!,
+                  style: GoogleFonts.roboto(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.blue,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     ),
@@ -90,13 +101,14 @@ class PortfolioScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final projects = context.watch<ProjectFormProvider>().projects;
     return withScaffold == true
-        ? portFolioScaffold(context)
-        : buildPortfolioBody(context: context, project: projects);
+        ? portFolioScaffold(context: context, projects: projects)
+        : buildPortfolioBody(context: context, projects: projects);
   }
 }
 
-Widget portFolioScaffold(context) {
+Widget portFolioScaffold({context, projects}) {
   return Scaffold(
     backgroundColor: Colors.white,
     appBar: AppBar(
@@ -104,11 +116,21 @@ Widget portFolioScaffold(context) {
       backgroundColor: Theme.of(context).colorScheme.primary,
       foregroundColor: Colors.white,
     ),
-    body: buildPortfolioBody(context: context, project: projects),
+    body: buildPortfolioBody(context: context, projects: projects),
+    floatingActionButton: FloatingActionButton(
+      onPressed: () {
+        // Navigasi ke AddPortfolioScreen
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const PortfolioFormScreen()),
+        );
+      },
+      child: const Icon(Icons.add),
+    ),
   );
 }
 
-Widget buildPortfolioBody({context, project}) {
+Widget buildPortfolioBody({context, projects}) {
   return LayoutBuilder(
     builder: (context, constraints) {
       final screenWidth = constraints.maxWidth;
@@ -126,22 +148,47 @@ Widget buildPortfolioBody({context, project}) {
       final itemHeight = 501.0; // tinggi fix
       final childAspectRatio = itemWidth / itemHeight;
 
-      return SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: projects.length,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+      return Scaffold(
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: MasonryGridView.count(
             crossAxisCount: crossAxisCount,
+            mainAxisSpacing: 16,
             crossAxisSpacing: 16,
-            mainAxisSpacing: 50,
-            childAspectRatio: childAspectRatio,
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            itemCount: projects.length,
+            itemBuilder: (context, index) =>
+                buildProjectCard(context, projects[index]),
           ),
-          itemBuilder: (context, index) {
-            final project = projects[index];
-            return buildProjectCard(context, project);
+
+          // GridView.builder(
+          //   shrinkWrap: true,
+          //   physics: const NeverScrollableScrollPhysics(),
+          //   itemCount: projects.length,
+          //   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          //     crossAxisCount: crossAxisCount,
+          //     crossAxisSpacing: 16,
+          //     mainAxisSpacing: 50,
+          //     childAspectRatio: childAspectRatio,
+          //   ),
+          //   itemBuilder: (context, index) {
+          //     final project = projects[index];
+          //     return buildProjectCard(context, project);
+          //   },
+          // ),
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            // Navigasi ke AddPortfolioScreen
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const PortfolioFormScreen(),
+              ),
+            );
           },
+          child: const Icon(Icons.add),
         ),
       );
     },

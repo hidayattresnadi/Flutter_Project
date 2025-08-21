@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:my_portfolio_app/provider/profile_provider.dart';
+import 'package:my_portfolio_app/provider/project_provider.dart';
 import 'package:my_portfolio_app/screens/contact_screen.dart';
 import 'package:my_portfolio_app/screens/edit_profile_screen.dart';
 import 'package:my_portfolio_app/screens/portfolio_screen.dart';
@@ -9,7 +10,13 @@ import 'screens/profile_screen.dart';
 
 void main() {
   runApp(
-    ChangeNotifierProvider(create: (_) => ProfileProvider(), child: MyApp()),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ProfileProvider()),
+        ChangeNotifierProvider(create: (_) => ProjectFormProvider()),
+      ],
+      child: MyApp(),
+    ),
   );
 }
 
@@ -33,13 +40,28 @@ class MyApp extends StatelessWidget {
 }
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  final int initialIndex;
+  const MainScreen({super.key, this.initialIndex = 0});
   @override
   State<MainScreen> createState() => _MainScreenState();
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _currentIndex = 0;
+  late int _currentIndex;
+  late PageController _pageController;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex;
+    _pageController = PageController(initialPage: _currentIndex);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   final List<Widget> _screens = [
     ProfileScreen(),
@@ -61,26 +83,26 @@ class _MainScreenState extends State<MainScreen> {
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white,
         actions: [
-          IconButton(
-            icon: Icon(Icons.edit),
-            onPressed: () {
-              final profile = context.read<ProfileProvider>().profile;
-              // Action for edit button
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => EditProfileScreen(
-                    name: profile.name,
-                    profession: profile.profession,
-                    email: profile.email,
-                    phone: profile.phone,
-                    address: profile.address,
-                    bio: profile.bio,
+          if (_currentIndex == 0)
+            IconButton(
+              icon: const Icon(Icons.edit),
+              onPressed: () {
+                final profile = context.read<ProfileProvider>().profile;
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => EditProfileScreen(
+                      name: profile.name,
+                      profession: profile.profession,
+                      email: profile.email,
+                      phone: profile.phone,
+                      address: profile.address,
+                      bio: profile.bio,
+                    ),
                   ),
-                ),
-              );
-            },
-          ),
+                );
+              },
+            ),
         ],
       ),
       body: PageView(
