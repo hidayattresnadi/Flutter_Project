@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hr_attendance_tracker/providers/attendance_record_provider.dart';
+import 'package:hr_attendance_tracker/providers/profile_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:hr_attendance_tracker/screens/attendance_history.dart';
 import 'package:hr_attendance_tracker/screens/home_screen.dart';
@@ -9,8 +10,11 @@ import 'package:intl/intl.dart';
 
 void main() {
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => AttendanceRecordProvider(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AttendanceRecordProvider()),
+        ChangeNotifierProvider(create: (_) => ProfileFormProvider()),
+      ],
       child: MyApp(),
     ),
   );

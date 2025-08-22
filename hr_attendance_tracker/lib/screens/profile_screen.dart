@@ -1,13 +1,11 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
 
-String fullName = "Muhammad Hidayat Tresnadi";
-String position = "Junior Mobile Developer";
-String department = "IT";
-String email = "john.doe@email.com";
-String phone = "+62 812-3456-7890";
-String location = "Jakarta, Indonesia";
-String bio =
-    "Passionate mobile developer with 3+ years experience in Flutter and React Native. Love creating beautiful and functional mobile applications.";
+import 'package:flutter/material.dart';
+import 'package:hr_attendance_tracker/models/profile_model.dart';
+import 'package:hr_attendance_tracker/providers/profile_provider.dart';
+import 'package:hr_attendance_tracker/screens/edit_profile_screen.dart';
+import 'package:provider/provider.dart';
+
 String totalLeaves = "10 Taken";
 String paySLips = "3 available";
 
@@ -16,22 +14,34 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: SingleChildScrollView(
+    final profile = context.watch<ProfileFormProvider>().profileData;
+    return Scaffold(
+      body: SingleChildScrollView(
         child: Column(
           children: [
-            buildProfileSection(),
+            buildProfileSection(profile),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                buildProfileInfo(),
+                buildProfileInfo(profile),
                 buildAdditionalInfo(),
                 Divider(height: 0, thickness: 2),
-                buildProfileBio(),
+                buildProfileBio(profile),
               ],
             ),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const UpdateProfileScreen(),
+            ),
+          );
+        },
+        child: const Icon(Icons.edit_rounded),
       ),
     );
   }
@@ -41,18 +51,20 @@ Widget buildCoverProfile() {
   return Container(height: 210, color: Color(0xFF004966));
 }
 
-Widget buildProfileHeader() {
+Widget buildProfileHeader(Profile profile) {
   return Column(
     children: [
       CircleAvatar(
         radius: 55,
-        backgroundImage: AssetImage('assets/images/profile.jpg'),
+        backgroundImage: profile.profilePhoto.startsWith('assets/')
+            ? AssetImage(profile.profilePhoto) as ImageProvider
+            : FileImage(File(profile.profilePhoto)),
       ),
       SizedBox(height: 15),
       Column(
         children: [
           Text(
-            fullName,
+            profile.fullName,
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -62,7 +74,7 @@ Widget buildProfileHeader() {
             overflow: TextOverflow.visible,
           ),
           Text(
-            position,
+            profile.position,
             style: TextStyle(
               fontSize: 18,
               color: Colors.white,
@@ -75,11 +87,11 @@ Widget buildProfileHeader() {
   );
 }
 
-Widget buildProfileSection() {
+Widget buildProfileSection(profile) {
   return Stack(
     clipBehavior: Clip.none,
     alignment: Alignment.center,
-    children: [buildCoverProfile(), buildProfileHeader()],
+    children: [buildCoverProfile(), buildProfileHeader(profile)],
   );
 }
 
@@ -123,7 +135,7 @@ Widget buildAdditionalInfo() {
   );
 }
 
-Widget buildProfileInfo() {
+Widget buildProfileInfo(profile) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -141,28 +153,28 @@ Widget buildProfileInfo() {
       ),
       buildReusableColumn(
         icon: Icons.business,
-        label: department,
+        label: profile.department,
         padding: 25.0,
         topPadding: 10.0,
       ),
       Divider(height: 0, thickness: 2),
       buildReusableColumn(
         icon: Icons.email,
-        label: email,
+        label: profile.email,
         padding: 25.0,
         topPadding: 25.0,
       ),
       Divider(height: 0, thickness: 2),
       buildReusableColumn(
         icon: Icons.phone,
-        label: phone,
+        label: profile.phone,
         padding: 25.0,
         topPadding: 25.0,
       ),
       Divider(height: 0, thickness: 2),
       buildReusableColumn(
         icon: Icons.location_on,
-        label: location,
+        label: profile.location,
         padding: 25.0,
         topPadding: 25.0,
       ),
@@ -171,7 +183,7 @@ Widget buildProfileInfo() {
   );
 }
 
-Widget buildProfileBio() {
+Widget buildProfileBio(profile) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -197,7 +209,9 @@ Widget buildProfileBio() {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Column(children: [Text(bio, style: TextStyle(fontSize: 16))]),
+            Column(
+              children: [Text(profile.bio, style: TextStyle(fontSize: 16))],
+            ),
           ],
         ),
       ),
