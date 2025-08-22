@@ -149,35 +149,43 @@ Widget buildPortfolioBody({context, projects}) {
       final childAspectRatio = itemWidth / itemHeight;
 
       return Scaffold(
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: MasonryGridView.count(
-            crossAxisCount: crossAxisCount,
-            mainAxisSpacing: 16,
-            crossAxisSpacing: 16,
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            itemCount: projects.length,
-            itemBuilder: (context, index) =>
-                buildProjectCard(context, projects[index]),
-          ),
+        body: projects.length > 0
+            ? SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: MasonryGridView.count(
+                  crossAxisCount: crossAxisCount,
+                  mainAxisSpacing: 16,
+                  crossAxisSpacing: 16,
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemCount: projects.length,
+                  itemBuilder: (context, index) =>
+                      buildProjectCard(context, projects[index]),
+                ),
 
-          // GridView.builder(
-          //   shrinkWrap: true,
-          //   physics: const NeverScrollableScrollPhysics(),
-          //   itemCount: projects.length,
-          //   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          //     crossAxisCount: crossAxisCount,
-          //     crossAxisSpacing: 16,
-          //     mainAxisSpacing: 50,
-          //     childAspectRatio: childAspectRatio,
-          //   ),
-          //   itemBuilder: (context, index) {
-          //     final project = projects[index];
-          //     return buildProjectCard(context, project);
-          //   },
-          // ),
-        ),
+                // GridView.builder(
+                //   shrinkWrap: true,
+                //   physics: const NeverScrollableScrollPhysics(),
+                //   itemCount: projects.length,
+                //   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                //     crossAxisCount: crossAxisCount,
+                //     crossAxisSpacing: 16,
+                //     mainAxisSpacing: 50,
+                //     childAspectRatio: childAspectRatio,
+                //   ),
+                //   itemBuilder: (context, index) {
+                //     final project = projects[index];
+                //     return buildProjectCard(context, project);
+                //   },
+                // ),
+              )
+            : Center(
+                child: Text(
+                  'No Portfolio yet',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ),
+
         floatingActionButton: FloatingActionButton(
           onPressed: () {
             // Navigasi ke AddPortfolioScreen
