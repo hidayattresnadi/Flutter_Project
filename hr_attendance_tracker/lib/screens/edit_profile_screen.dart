@@ -96,6 +96,15 @@ class FormScreenState extends State<UpdateProfileScreen> {
                         ),
                       ),
                       const SizedBox(height: 24),
+                      // Image Picker
+                      ImagePickerExample(
+                        onImageSelected: (path) {
+                          profileFormProvider.formData.profilePhoto =
+                              path; // simpan ke model
+                        },
+                        initialImage: profileFormProvider.formData.profilePhoto,
+                      ),
+                      const SizedBox(height: 50),
                       // Full Name
                       CustomTextFormField(
                         label: 'Full Name',
@@ -106,7 +115,7 @@ class FormScreenState extends State<UpdateProfileScreen> {
                             return 'full name cannot be empty';
                           }
 
-                          if (value.length == 3) {
+                          if (value.length <= 3) {
                             return 'minimal 3 characters';
                           }
                           return null;
@@ -251,25 +260,7 @@ class FormScreenState extends State<UpdateProfileScreen> {
                         keyboardType: TextInputType.multiline,
                         // maxLines: 3,
                       ),
-                      // technologies
-                      const SizedBox(height: 16),
 
-                      // Image Picker
-                      ImagePickerExample(
-                        onImageSelected: (path) {
-                          profileFormProvider.formData.profilePhoto =
-                              path; // simpan ke model
-                        },
-                        initialImage: profileFormProvider.formData.profilePhoto,
-                      ),
-                      // if (profileFormProvider.imageError != null)
-                      //   Padding(
-                      //     padding: const EdgeInsets.only(top: 8),
-                      //     child: Text(
-                      //       'No image selected',
-                      //       style: const TextStyle(color: Colors.red),
-                      //     ),
-                      //   ),
                       const SizedBox(height: 20),
 
                       // Submit
