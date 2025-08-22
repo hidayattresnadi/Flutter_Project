@@ -115,7 +115,7 @@ class FormScreenState extends State<UpdateProfileScreen> {
                             return 'full name cannot be empty';
                           }
 
-                          if (value.length <= 3) {
+                          if (value.length < 3) {
                             return 'minimal 3 characters';
                           }
                           return null;
