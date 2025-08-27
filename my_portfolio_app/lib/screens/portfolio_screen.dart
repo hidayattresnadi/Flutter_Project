@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:my_portfolio_app/models/project_model.dart';
 import 'package:my_portfolio_app/provider/project_provider.dart';
-import 'package:my_portfolio_app/screens/add_portfolio_form.dart';
+import 'package:my_portfolio_app/routes.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -95,20 +95,52 @@ Widget buildProjectCard(BuildContext context, Project project) {
   );
 }
 
-class PortfolioScreen extends StatelessWidget {
+class PortfolioScreen extends StatefulWidget {
   final bool withScaffold;
-  const PortfolioScreen({this.withScaffold = false, super.key});
+  final ValueChanged<int>? onTabChanged;
+
+  const PortfolioScreen({
+    this.withScaffold = false,
+    this.onTabChanged,
+    super.key,
+  });
+
+  @override
+  State<PortfolioScreen> createState() => _PortfolioScreenState();
+}
+
+class _PortfolioScreenState extends State<PortfolioScreen> {
+  int _currentIndex = 0;
 
   @override
   Widget build(BuildContext context) {
     final projects = context.watch<ProjectFormProvider>().projects;
-    return withScaffold == true
-        ? portFolioScaffold(context: context, projects: projects)
-        : buildPortfolioBody(context: context, projects: projects);
+
+    return widget.withScaffold
+        ? portFolioScaffold(
+            context: context,
+            projects: projects,
+            currentIndex: _currentIndex,
+            onTabChanged: (index) {
+              setState(() {
+                _currentIndex = index;
+              });
+            },
+          )
+        : buildPortfolioBody(
+            context: context,
+            projects: projects,
+            onTabChanged: widget.onTabChanged,
+          );
   }
 }
 
-Widget portFolioScaffold({context, projects}) {
+Widget portFolioScaffold({
+  required BuildContext context,
+  required List projects,
+  required int currentIndex,
+  required Function(int) onTabChanged,
+}) {
   return Scaffold(
     backgroundColor: Colors.white,
     appBar: AppBar(
@@ -116,25 +148,81 @@ Widget portFolioScaffold({context, projects}) {
       backgroundColor: Theme.of(context).colorScheme.primary,
       foregroundColor: Colors.white,
     ),
-    body: buildPortfolioBody(context: context, projects: projects),
-    floatingActionButton: FloatingActionButton(
-      onPressed: () {
-        // Navigasi ke AddPortfolioScreen
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const PortfolioFormScreen()),
+    body: buildPortfolioBody(
+      context: context,
+      projects: projects,
+      onTabChanged: onTabChanged,
+    ),
+    floatingActionButton: currentIndex == 0
+        ? FloatingActionButton(
+            onPressed: () {
+              Navigator.pushNamed(context, AppRoutes.addPortfolio);
+            },
+            child: const Icon(Icons.add),
+          )
+        : null,
+  );
+}
+
+Widget buildPortfolioBody({
+  context,
+  projects,
+  ValueChanged<int>? onTabChanged,
+}) {
+  return DefaultTabController(
+    length: 3,
+    child: Builder(
+      builder: (context) {
+        final controller = DefaultTabController.of(context);
+        controller.addListener(() {
+          if (!controller.indexIsChanging && onTabChanged != null) {
+            onTabChanged(controller.index); // kirim index balik
+          }
+        });
+
+        return Column(
+          children: [
+            const TabBar(
+              tabs: [
+                Tab(text: 'All'),
+                Tab(text: 'Web Projects'),
+                Tab(text: 'Mobile App'),
+              ],
+            ),
+            Expanded(
+              child: TabBarView(
+                children: [
+                  buildProjectGrid(context: context, projects: projects),
+                  buildProjectGrid(
+                    context: context,
+                    projects: projects
+                        .where((p) => p.category == 'Web Development')
+                        .toList(),
+                  ),
+                  buildProjectGrid(
+                    context: context,
+                    projects: projects
+                        .where((p) => p.category == 'Mobile App')
+                        .toList(),
+                  ),
+                ],
+              ),
+            ),
+          ],
         );
       },
-      child: const Icon(Icons.add),
     ),
   );
 }
 
-Widget buildPortfolioBody({context, projects}) {
+Widget buildProjectGrid({
+  required BuildContext context,
+  required List projects,
+}) {
   return LayoutBuilder(
     builder: (context, constraints) {
       final screenWidth = constraints.maxWidth;
-      // final crossAxisCount = screenWidth < 600 ? 1 : 2;
+
       int crossAxisCount;
       if (screenWidth < 600) {
         crossAxisCount = 1; // HP
@@ -143,62 +231,48 @@ Widget buildPortfolioBody({context, projects}) {
       } else {
         crossAxisCount = 3; // Desktop
       }
+
       final spacing = 16 * (crossAxisCount - 1);
       final itemWidth = (screenWidth - spacing) / crossAxisCount;
       final itemHeight = 501.0; // tinggi fix
       final childAspectRatio = itemWidth / itemHeight;
 
-      return Scaffold(
-        body: projects.length > 0
-            ? SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: MasonryGridView.count(
-                  crossAxisCount: crossAxisCount,
-                  mainAxisSpacing: 16,
-                  crossAxisSpacing: 16,
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: projects.length,
-                  itemBuilder: (context, index) =>
-                      buildProjectCard(context, projects[index]),
-                ),
-
-                // GridView.builder(
-                //   shrinkWrap: true,
-                //   physics: const NeverScrollableScrollPhysics(),
-                //   itemCount: projects.length,
-                //   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                //     crossAxisCount: crossAxisCount,
-                //     crossAxisSpacing: 16,
-                //     mainAxisSpacing: 50,
-                //     childAspectRatio: childAspectRatio,
-                //   ),
-                //   itemBuilder: (context, index) {
-                //     final project = projects[index];
-                //     return buildProjectCard(context, project);
-                //   },
-                // ),
-              )
-            : Center(
-                child: Text(
-                  'No Portfolio yet',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
+      return projects.isNotEmpty
+          ? SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: MasonryGridView.count(
+                crossAxisCount: crossAxisCount,
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 16,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: projects.length,
+                itemBuilder: (context, index) =>
+                    buildProjectCard(context, projects[index]),
               ),
 
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            // Navigasi ke AddPortfolioScreen
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const PortfolioFormScreen(),
+              // GridView.builder(
+              //   shrinkWrap: true,
+              //   physics: const NeverScrollableScrollPhysics(),
+              //   itemCount: projects.length,
+              //   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              //     crossAxisCount: crossAxisCount,
+              //     crossAxisSpacing: 16,
+              //     mainAxisSpacing: 50,
+              //     childAspectRatio: childAspectRatio,
+              //   ),
+              //   itemBuilder: (context, index) {
+              //     final project = projects[index];
+              //     return buildProjectCard(context, project);
+              //   },
+              // ),
+            )
+          : const Center(
+              child: Text(
+                'No Portfolio yet',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             );
-          },
-          child: const Icon(Icons.add),
-        ),
-      );
     },
   );
 }

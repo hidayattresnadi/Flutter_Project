@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_portfolio_app/provider/profile_provider.dart';
-import 'package:my_portfolio_app/screens/portfolio_screen.dart';
+import 'package:my_portfolio_app/routes.dart';
 import 'package:provider/provider.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -91,12 +91,7 @@ Widget buildMyPortfolio(BuildContext context) {
               ),
               GestureDetector(
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => PortfolioScreen(withScaffold: true),
-                    ),
-                  );
+                  Navigator.pushNamed(context, AppRoutes.portfolioList);
                 },
                 child: Icon(Icons.chevron_right_rounded, color: Colors.white),
               ),

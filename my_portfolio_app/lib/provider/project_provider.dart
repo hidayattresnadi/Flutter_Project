@@ -82,6 +82,5 @@ class ProjectFormProvider with ChangeNotifier {
     linkController.clear();
     techController.clear();
     _imageError = null;
-    notifyListeners();
   }
 }

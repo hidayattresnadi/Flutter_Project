@@ -4,45 +4,28 @@ import 'package:my_portfolio_app/provider/profile_provider.dart';
 import 'package:my_portfolio_app/widgets/form_text_field.dart';
 import 'package:provider/provider.dart';
 
-class EditProfileScreen extends StatelessWidget {
-  final String name;
-  final String profession;
-  final String email;
-  final String phone;
-  final String address;
-  final String bio;
+class EditProfileScreen extends StatefulWidget {
+  const EditProfileScreen({super.key});
 
-  const EditProfileScreen({
-    super.key,
-    required this.name,
-    required this.profession,
-    required this.email,
-    required this.phone,
-    required this.address,
-    required this.bio,
-  });
+  @override
+  State<EditProfileScreen> createState() => FormScreenState();
+}
+
+class FormScreenState extends State<EditProfileScreen> {
+  @override
+  void initState() {
+    super.initState();
+
+    final profileFormProvider = Provider.of<ProfileProvider>(
+      context,
+      listen: false,
+    );
+    profileFormProvider.initForm();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final TextEditingController namecontroller = TextEditingController(
-      text: name,
-    );
-    final TextEditingController professionController = TextEditingController(
-      text: profession,
-    );
-    final TextEditingController emailController = TextEditingController(
-      text: email,
-    );
-    final TextEditingController phoneController = TextEditingController(
-      text: phone,
-    );
-    final TextEditingController addressController = TextEditingController(
-      text: address,
-    );
-    final TextEditingController bioController = TextEditingController(
-      text: bio,
-    );
-
+    final profileFormProvider = Provider.of<ProfileProvider>(context);
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -70,54 +53,39 @@ class EditProfileScreen extends StatelessWidget {
                     0.04, // 4% tinggi layar
                 children: [
                   buildFormTextField(
-                    controller: namecontroller,
+                    controller: profileFormProvider.namecontroller,
                     label: 'Edit name',
                   ),
                   buildFormTextField(
-                    controller: professionController,
+                    controller: profileFormProvider.professionController,
                     label: 'Edit profession',
                   ),
                   buildFormTextField(
-                    controller: emailController,
+                    controller: profileFormProvider.emailController,
                     label: 'Edit email',
                   ),
                   buildFormTextField(
-                    controller: phoneController,
+                    controller: profileFormProvider.phoneController,
                     label: 'Edit phone',
                   ),
                   buildFormTextField(
-                    controller: addressController,
+                    controller: profileFormProvider.addressController,
                     label: 'Edit address',
                   ),
                   buildFormTextField(
-                    controller: bioController,
+                    controller: profileFormProvider.bioController,
                     label: 'Edit bio',
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      final newName = namecontroller.text;
-                      final newProfession = professionController.text;
-                      final newEmail = emailController.text;
-                      final newPhone = phoneController.text;
-                      final newAddress = addressController.text;
-                      final newBio = bioController.text;
-
-                      if (newName.isNotEmpty) {
-                        context.read<ProfileProvider>().updateProfile(
-                          newName,
-                          newProfession,
-                          newEmail,
-                          newPhone,
-                          newAddress,
-                          newBio,
-                        );
-                        Fluttertoast.showToast(
-                          msg: 'data is update',
-                          toastLength: Toast.LENGTH_SHORT,
-                          gravity: ToastGravity.BOTTOM,
-                        );
-                        Navigator.pop(context);
-                      }
+                      context.read<ProfileProvider>().updateProfile();
+                      // context.read<ProfileProvider>().dispose();
+                      Fluttertoast.showToast(
+                        msg: 'data is update',
+                        toastLength: Toast.LENGTH_SHORT,
+                        gravity: ToastGravity.BOTTOM,
+                      );
+                      Navigator.pop(context);
                     },
                     child: Text('Save'),
                   ),

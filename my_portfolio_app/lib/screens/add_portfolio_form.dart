@@ -76,9 +76,20 @@ class PortfolioFormScreen extends StatelessWidget {
                               FocusNode focusNode,
                               VoidCallback onFieldSubmitted,
                             ) {
-                              // sinkronisasi controller provider dengan field controller
-                              textEditingController.text =
-                                  portfolioFormProvider.titleController.text;
+                              if (textEditingController.text.isEmpty &&
+                                  portfolioFormProvider
+                                      .titleController
+                                      .text
+                                      .isNotEmpty) {
+                                textEditingController.text =
+                                    portfolioFormProvider.titleController.text;
+                              }
+
+                              // listen ke perubahan input, update provider
+                              textEditingController.addListener(() {
+                                portfolioFormProvider.titleController.text =
+                                    textEditingController.text;
+                              });
 
                               return TextFormField(
                                 controller: textEditingController,

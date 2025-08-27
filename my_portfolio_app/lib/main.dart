@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:my_portfolio_app/provider/profile_provider.dart';
 import 'package:my_portfolio_app/provider/project_provider.dart';
+import 'package:my_portfolio_app/routes.dart';
 import 'package:my_portfolio_app/screens/contact_screen.dart';
 import 'package:my_portfolio_app/screens/edit_profile_screen.dart';
 import 'package:my_portfolio_app/screens/portfolio_screen.dart';
@@ -20,8 +21,6 @@ void main() {
   );
 }
 
-final PageController _pageController = PageController();
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -30,6 +29,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: MainScreen(),
+      onGenerateRoute: AppRoutes.generateRoute,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
@@ -48,6 +48,7 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   late int _currentIndex;
+  int _portfolioTabIndex = 0; // <- simpan index tab portfolio
   late PageController _pageController;
 
   @override
@@ -63,15 +64,22 @@ class _MainScreenState extends State<MainScreen> {
     super.dispose();
   }
 
-  final List<Widget> _screens = [
-    ProfileScreen(),
-    PortfolioScreen(withScaffold: false),
-    ContactScreen(),
-  ];
   final List<String> _titles = ['Profile', 'My Portfolio', 'My Contact'];
 
   @override
   Widget build(BuildContext context) {
+    final List<Widget> screens = [
+      ProfileScreen(),
+      PortfolioScreen(
+        withScaffold: false,
+        onTabChanged: (index) {
+          setState(() {
+            _portfolioTabIndex = index;
+          });
+        },
+      ),
+      ContactScreen(),
+    ];
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -87,19 +95,9 @@ class _MainScreenState extends State<MainScreen> {
             IconButton(
               icon: const Icon(Icons.edit),
               onPressed: () {
-                final profile = context.read<ProfileProvider>().profile;
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => EditProfileScreen(
-                      name: profile.name,
-                      profession: profile.profession,
-                      email: profile.email,
-                      phone: profile.phone,
-                      address: profile.address,
-                      bio: profile.bio,
-                    ),
-                  ),
+                  MaterialPageRoute(builder: (context) => EditProfileScreen()),
                 );
               },
             ),
@@ -110,9 +108,12 @@ class _MainScreenState extends State<MainScreen> {
         onPageChanged: (index) {
           setState(() {
             _currentIndex = index;
+            if (index == 1) {
+              _portfolioTabIndex = 0; // reset ke tab awal
+            }
           });
         },
-        children: _screens, // list of widgets
+        children: screens, // list of widgets
       ),
 
       bottomNavigationBar: BottomNavigationBar(
@@ -137,6 +138,40 @@ class _MainScreenState extends State<MainScreen> {
             label: ' My Contact',
           ),
         ],
+      ),
+      floatingActionButton: _currentIndex == 1 && _portfolioTabIndex == 0
+          ? FloatingActionButton(
+              onPressed: () {
+                Navigator.pushNamed(context, AppRoutes.addPortfolio);
+              },
+              child: const Icon(Icons.add),
+            )
+          : null,
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              child: Text(
+                'Drawer Menu',
+                style: TextStyle(color: Colors.white, fontSize: 24),
+              ),
+            ),
+            ListTile(
+              leading: Icon(Icons.settings),
+              title: Text('SettingsPage'),
+              onTap: () => Navigator.pushNamed(context, AppRoutes.settingPage),
+            ),
+            ListTile(
+              leading: Icon(Icons.info),
+              title: Text('AboutPage'),
+              onTap: () => Navigator.pushNamed(context, AppRoutes.aboutPage),
+            ),
+          ],
+        ),
       ),
     );
   }
