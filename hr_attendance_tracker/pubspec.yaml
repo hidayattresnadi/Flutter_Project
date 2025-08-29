@@ -42,6 +42,7 @@ dependencies:
   auto_size_text: ^3.0.0
   image_picker: ^1.1.2
   mask_text_input_formatter: ^2.9.0
+  carousel_slider: ^5.0.0
 
 dev_dependencies:
   flutter_test:
@@ -68,6 +69,7 @@ flutter:
   assets:
     - assets/images/profile.jpg
     - assets/images/attendance.jpg
+    - assets/images/attendance_2.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

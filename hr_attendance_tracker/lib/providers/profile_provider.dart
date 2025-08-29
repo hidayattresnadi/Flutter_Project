@@ -41,7 +41,6 @@ class ProfileFormProvider with ChangeNotifier {
     bioController.text = profileData.bio;
     formData.department = profileData.department;
     formData.profilePhoto = profileData.profilePhoto;
-    notifyListeners();
   }
 
   void savedEmployeePosition(String name) {
@@ -102,7 +101,6 @@ class ProfileFormProvider with ChangeNotifier {
     locationController.clear();
     bioController.clear();
     _imageError = null;
-    notifyListeners();
   }
 
   @override

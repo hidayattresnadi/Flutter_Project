@@ -1,12 +1,14 @@
 import 'dart:io';
 
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hr_attendance_tracker/models/menu_model.dart';
 import 'package:hr_attendance_tracker/providers/attendance_record_provider.dart';
 import 'package:hr_attendance_tracker/providers/profile_provider.dart';
 import 'package:hr_attendance_tracker/screens/attendance_history.dart';
+import 'package:hr_attendance_tracker/widgets/carousel_add.dart';
 import 'package:hr_attendance_tracker/widgets/clock_in_button.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -150,6 +152,8 @@ class HomeScreen extends StatelessWidget {
             // ===== View Attendance History Button =====
             SizedBox(height: 30),
             buildListMenus(),
+            SizedBox(height: 20),
+            CarouselAds(),
           ],
         ),
       ),

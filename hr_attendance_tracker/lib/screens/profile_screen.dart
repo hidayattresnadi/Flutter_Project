@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:hr_attendance_tracker/models/profile_model.dart';
 import 'package:hr_attendance_tracker/providers/profile_provider.dart';
-import 'package:hr_attendance_tracker/screens/edit_profile_screen.dart';
+import 'package:hr_attendance_tracker/routes.dart';
 import 'package:provider/provider.dart';
 
 String totalLeaves = "10 Taken";
@@ -34,12 +34,7 @@ class ProfileScreen extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const UpdateProfileScreen(),
-            ),
-          );
+          Navigator.pushNamed(context, AppRoutes.updateProfile);
         },
         child: const Icon(Icons.edit_rounded),
       ),

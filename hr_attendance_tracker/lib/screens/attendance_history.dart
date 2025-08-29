@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hr_attendance_tracker/models/attendance_record_model.dart';
 import 'package:hr_attendance_tracker/providers/attendance_record_provider.dart';
+import 'package:hr_attendance_tracker/screens/tab_attendance_screen/attendance_tab.dart';
+import 'package:hr_attendance_tracker/screens/tab_attendance_screen/shift_tab.dart';
+import 'package:hr_attendance_tracker/widgets/month_dropdown.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -140,7 +143,7 @@ class AttendanceHistoryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget content = attendanceScreenBody(context);
+    Widget content = buildTabAttendanceLog(context);
 
     return withScaffold == true ? attendanceScreenScaffold(context) : content;
   }
@@ -174,7 +177,7 @@ Widget attendanceScreenScaffold(BuildContext context) {
       centerTitle: false,
       elevation: 0,
     ),
-    body: attendanceScreenBody(context),
+    body: buildTabAttendanceLog(context),
   );
 }
 
@@ -213,6 +216,10 @@ Widget attendanceScreenBody(BuildContext context) {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Month Dropdown
+        MonthDropdown(),
+
+        const SizedBox(height: 16),
         // Summary Card (Grid)
         Card(
           child: Padding(
@@ -314,6 +321,32 @@ Widget attendanceScreenBody(BuildContext context) {
                   );
                 },
               ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+Widget buildTabAttendanceLog(BuildContext context) {
+  return DefaultTabController(
+    length: 3,
+    child: Column(
+      children: [
+        const TabBar(
+          tabs: [
+            Tab(text: 'Logs'),
+            Tab(text: 'Attendance'),
+            Tab(text: 'Shift'),
+          ],
+        ),
+        Expanded(
+          child: TabBarView(
+            children: [
+              attendanceScreenBody(context),
+              buildTabAttendance(),
+              buildTabShift(),
             ],
           ),
         ),

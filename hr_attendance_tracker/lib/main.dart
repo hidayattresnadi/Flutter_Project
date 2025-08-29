@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hr_attendance_tracker/providers/attendance_record_provider.dart';
 import 'package:hr_attendance_tracker/providers/profile_provider.dart';
+import 'package:hr_attendance_tracker/routes.dart';
 import 'package:provider/provider.dart';
 import 'package:hr_attendance_tracker/screens/attendance_history.dart';
 import 'package:hr_attendance_tracker/screens/home_screen.dart';
@@ -32,6 +33,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
+      onGenerateRoute: AppRoutes.generateRoute,
     );
   }
 }
@@ -56,6 +58,7 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final profile = context.watch<ProfileFormProvider>().profileData;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -121,6 +124,86 @@ class _MainScreenState extends State<MainScreen> {
             BottomNavigationBarItem(
               icon: Icon(Icons.assignment_turned_in_sharp),
               label: 'Attendance History',
+            ),
+          ],
+        ),
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            UserAccountsDrawerHeader(
+              accountName: Text(
+                profile.fullName,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              accountEmail: Text(profile.email),
+              currentAccountPicture: CircleAvatar(
+                backgroundImage: AssetImage('assets/images/profile.jpg'),
+                radius: 40,
+              ),
+              decoration: BoxDecoration(color: Color(0xFF004966)),
+            ),
+            // DrawerHeader(
+            //   decoration: BoxDecoration(
+            //     color: Theme.of(context).colorScheme.primary,
+            //   ),
+            //   child: Column(
+            //     crossAxisAlignment: CrossAxisAlignment.start,
+            //     mainAxisAlignment: MainAxisAlignment.center,
+            //     children: [
+            //       CircleAvatar(
+            //         radius: 40,
+            //         backgroundImage: AssetImage('assets/images/profile.jpg'),
+            //       ),
+            //       SizedBox(height: 10),
+            //       Text(
+            //         profile.fullName,
+            //         style: TextStyle(
+            //           fontSize: 14,
+            //           fontWeight: FontWeight.bold,
+            //           color: Colors.white,
+            //         ),
+            //         softWrap: true,
+            //         overflow: TextOverflow.visible,
+            //       ),
+            //       Text(
+            //         profile.position,
+            //         style: TextStyle(
+            //           fontSize: 12,
+            //           color: Colors.white,
+            //           fontWeight: FontWeight.bold,
+            //         ),
+            //       ),
+            //       Text(
+            //         'HR Attendance Tracker',
+            //         style: TextStyle(
+            //           color: Colors.white,
+            //           fontSize: 18,
+            //           fontWeight: FontWeight.bold,
+            //         ),
+            //       ),
+            //     ],
+            //   ),
+            // ),
+            // ListTile(
+            //   title: Text(
+            //     'HR Attendance Tracker',
+            //     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            //   ),
+            // ),
+            ListTile(
+              leading: Icon(Icons.settings),
+              title: Text('SettingsPage'),
+              onTap: () => Navigator.pushNamed(context, AppRoutes.settingPage),
+            ),
+            ListTile(
+              leading: Icon(Icons.info),
+              title: Text('AboutPage'),
+              onTap: () => Navigator.pushNamed(context, AppRoutes.aboutPage),
             ),
           ],
         ),
