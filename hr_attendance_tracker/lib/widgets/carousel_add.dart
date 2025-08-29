@@ -1,8 +1,10 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 
 class CarouselAds extends StatefulWidget {
-  const CarouselAds({super.key});
+  final List<Map<String, String>> items;
+  const CarouselAds({super.key, required this.items});
 
   @override
   State<CarouselAds> createState() => _CarouselAdsState();
@@ -11,10 +13,7 @@ class CarouselAds extends StatefulWidget {
 class _CarouselAdsState extends State<CarouselAds> {
   int activeIndex = 0;
 
-  final List<Map<String, String>> items = [
-    {'text': 'Now you can request time-off directly from the app!'},
-    {'text': 'New: Performance reviews available on mobile.'},
-  ];
+  List<Map<String, String>> get items => widget.items;
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +21,7 @@ class _CarouselAdsState extends State<CarouselAds> {
       items: items.map((item) {
         return Container(
           decoration: BoxDecoration(
-            color: Colors.red.shade800,
+            color: Color(int.parse(item['color']!)),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Stack(
@@ -30,53 +29,57 @@ class _CarouselAdsState extends State<CarouselAds> {
               Row(
                 children: [
                   Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(
-                            left: 12,
-                            top: 8,
-                            bottom: 8,
-                          ),
-                          child: Text(
-                            item['text']!,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 200),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              left: 12,
+                              top: 8,
+                              bottom: 8,
+                            ),
+                            child: AutoSizeText(
+                              item['text']!,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                              minFontSize: 12,
+                              maxFontSize: 20,
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 10),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          margin: const EdgeInsets.only(left: 12, bottom: 8),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            color: Colors.amber.shade900,
-                          ),
-                          child: const Text(
-                            'Learn more',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                          const SizedBox(height: 10),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            margin: const EdgeInsets.only(left: 12, bottom: 8),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              color: Colors.amber.shade900,
+                            ),
+                            child: const Text(
+                              'Learn more',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                   Image.asset(
-                    'assets/images/attendance_2.png',
-                    fit: BoxFit.cover,
-                    width: 100,
-                    height: 100,
+                    item['image']!,
+                    fit: BoxFit.contain,
+                    width: MediaQuery.of(context).size.width * 0.3,
+                    height: MediaQuery.of(context).size.width * 0.3,
                   ),
                 ],
               ),
@@ -108,7 +111,7 @@ class _CarouselAdsState extends State<CarouselAds> {
         );
       }).toList(),
       options: CarouselOptions(
-        height: 120,
+        height: 125,
         autoPlay: true,
         enlargeCenterPage: true,
         enableInfiniteScroll: true,

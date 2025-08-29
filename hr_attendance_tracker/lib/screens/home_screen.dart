@@ -153,7 +153,20 @@ class HomeScreen extends StatelessWidget {
             SizedBox(height: 30),
             buildListMenus(),
             SizedBox(height: 20),
-            CarouselAds(),
+            CarouselAds(
+              items: [
+                {
+                  'text': 'Now you can request time-off directly from the app!',
+                  'color': '0xFFC62828',
+                  'image': 'assets/images/attendance_2.png',
+                },
+                {
+                  'text': 'New: Performance reviews available on mobile.',
+                  'color': '0xFF29B6F6',
+                  'image': 'assets/images/handphone.png',
+                },
+              ],
+            ),
           ],
         ),
       ),
