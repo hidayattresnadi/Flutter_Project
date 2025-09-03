@@ -18,15 +18,28 @@ class ProjectForm {
     this.technologies = '',
   });
 
-  Project toProject() {
-    return Project(
-      title: title,
-      category: category ?? "Uncategorized",
-      completionDate: completionDate ?? DateTime.now(),
-      description: description,
-      link: link,
-      technologies: technologies ?? "Unknown",
-      imagePath: imagePath ?? "assets/images/default.png",
-    );
+  // Project toProject() {
+  //   return Project(
+  //     title: title,
+  //     category: category ?? "Uncategorized",
+  //     completionDate: completionDate ?? DateTime.now(),
+  //     description: description,
+  //     link: link,
+  //     technologies: technologies ?? "Unknown",
+  //     imagePath: imagePath ?? "assets/images/default.png",
+  //   );
+  // }
+
+  // Fungsi untuk mengubah objek Todo menjadi format JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'category': category,
+      'completion_date': completionDate!.toLocal().toString().split(' ')[0],
+      'description': description,
+      'project_link': link,
+      'technologies': technologies,
+      'image_path': imagePath,
+    };
   }
 }

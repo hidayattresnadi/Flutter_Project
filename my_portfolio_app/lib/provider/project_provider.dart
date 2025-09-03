@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:my_portfolio_app/models/project_form_model.dart';
 import 'package:my_portfolio_app/models/project_model.dart';
+import 'package:my_portfolio_app/services/portfolio_service.dart';
 
 class ProjectFormProvider with ChangeNotifier {
   final formKey = GlobalKey<FormState>();
-  final List<Project> projects = [];
+  List<Project> _projects = [];
+  String? _errorMessage;
   String? _imageError;
+  bool _isLoading = false;
+
   String? get imageError => _imageError;
+  List<Project> get projects => _projects;
+  String? get errorMessage => _errorMessage;
+  bool get isLoading => _isLoading;
 
   // Controllers
   final titleController = TextEditingController();
@@ -24,8 +31,31 @@ class ProjectFormProvider with ChangeNotifier {
     }
   }
 
+  // get all data from API
+  Future<void> fetchPortfolios({String? category}) async {
+    _errorMessage = null;
+    _isLoading = true;
+    _projects = [];
+
+    await Future.delayed(const Duration(seconds: 2));
+    // notifyListeners();
+
+    try {
+      _projects = await PortfolioService.fetchPortfolios(category: category);
+    } catch (e) {
+      _errorMessage = e.toString();
+    }
+    _isLoading = false;
+    notifyListeners();
+  }
+
   void setCategory(String? value) {
     formData.category = value;
+    notifyListeners();
+  }
+
+  void clearError() {
+    _errorMessage = null;
     notifyListeners();
   }
 
@@ -65,13 +95,30 @@ class ProjectFormProvider with ChangeNotifier {
     return isValid && formData.imagePath != null;
   }
 
+  // Add Project
+  Future<bool> addProject() async {
+    try {
+      formData.title = titleController.text;
+      formData.description = descriptionController.text;
+      formData.link = linkController.text;
+      formData.technologies = techController.text;
+      await PortfolioService.addPortolio(formData);
+      await fetchPortfolios();
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+      return false;
+    }
+  }
+
   void saveForm() {
     formData.title = titleController.text;
     formData.description = descriptionController.text;
     formData.link = linkController.text;
     formData.technologies = techController.text;
-    final project = formData.toProject();
-    projects.add(project);
+    // final project = formData.toProject();
+    // projects.add(project);
     notifyListeners();
   }
 
@@ -81,6 +128,7 @@ class ProjectFormProvider with ChangeNotifier {
     descriptionController.clear();
     linkController.clear();
     techController.clear();
+    _errorMessage = null;
     _imageError = null;
   }
 }

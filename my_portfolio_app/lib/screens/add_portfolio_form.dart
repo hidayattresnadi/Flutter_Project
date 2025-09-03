@@ -323,8 +323,12 @@ class PortfolioFormScreen extends StatelessWidget {
                                       child: const Text('Back'),
                                     ),
                                     ElevatedButton(
-                                      onPressed: () =>
-                                          Navigator.of(ctx).pop(true),
+                                      onPressed: () {
+                                        context
+                                            .read<ProjectFormProvider>()
+                                            .clearError();
+                                        Navigator.of(ctx).pop(true);
+                                      },
                                       child: const Text('Confirm'),
                                     ),
                                   ],
@@ -341,28 +345,47 @@ class PortfolioFormScreen extends StatelessWidget {
                           ),
                           const SizedBox(width: 25),
                           ElevatedButton(
-                            onPressed: () {
+                            onPressed: () async {
                               if (portfolioFormProvider.validateForm()) {
-                                portfolioFormProvider.saveForm();
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      'Portfolio item added successfully!',
+                                bool success = await context
+                                    .read<ProjectFormProvider>()
+                                    .addProject();
+                                if (success) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        'Portfolio item added successfully!',
+                                      ),
                                     ),
-                                  ),
-                                );
-                                if (!portfolioFormProvider.previousTitleEntries
-                                    .contains(
+                                  );
+
+                                  if (!portfolioFormProvider
+                                      .previousTitleEntries
+                                      .contains(
+                                        portfolioFormProvider
+                                            .titleController
+                                            .text,
+                                      )) {
+                                    portfolioFormProvider.savedProjectName(
                                       portfolioFormProvider
                                           .titleController
                                           .text,
-                                    )) {
-                                  portfolioFormProvider.savedProjectName(
-                                    portfolioFormProvider.titleController.text,
-                                  );
+                                    );
+                                  }
+
+                                  portfolioFormProvider.resetForm();
+
+                                  if (context.mounted) Navigator.pop(context);
+                                } else {
+                                  if (context.mounted) {
+                                    final errorMessage = context
+                                        .read<ProjectFormProvider>()
+                                        .errorMessage;
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('$errorMessage')),
+                                    );
+                                  }
                                 }
-                                portfolioFormProvider.resetForm();
-                                Navigator.of(context).pop(false);
                               }
                             },
                             child: const Text('Submit'),

@@ -44,7 +44,7 @@ Widget buildProjectCard(BuildContext context, Project project) {
             ),
           ),
           Text(
-            'Completed on: ${project.completionDate!.toLocal().toString().split(' ')[0]}',
+            'Completed on: ${project.completionDate}',
             style: GoogleFonts.roboto(
               fontSize: 16,
               fontWeight: FontWeight.w500,
@@ -109,8 +109,41 @@ class PortfolioScreen extends StatefulWidget {
   State<PortfolioScreen> createState() => _PortfolioScreenState();
 }
 
-class _PortfolioScreenState extends State<PortfolioScreen> {
+class _PortfolioScreenState extends State<PortfolioScreen>
+    with SingleTickerProviderStateMixin {
   int _currentIndex = 0;
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+
+    _tabController.addListener(() {
+      if (!_tabController.indexIsChanging) {
+        setState(() {
+          _currentIndex = _tabController.index;
+        });
+        _loadDataForTab(_currentIndex);
+      }
+    });
+
+    // pertama kali load (All)
+    _loadDataForTab(0);
+  }
+
+  Future<void> _loadDataForTab(int index) {
+    final provider = context.read<ProjectFormProvider>();
+
+    switch (index) {
+      case 1:
+        return provider.fetchPortfolios(category: "Web Development");
+      case 2:
+        return provider.fetchPortfolios(category: "Mobile App");
+      default:
+        return provider.fetchPortfolios(); // All
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -121,15 +154,12 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
             context: context,
             projects: projects,
             currentIndex: _currentIndex,
-            onTabChanged: (index) {
-              setState(() {
-                _currentIndex = index;
-              });
-            },
+            tabController: _tabController,
           )
         : buildPortfolioBody(
             context: context,
             projects: projects,
+            tabController: _tabController,
             onTabChanged: widget.onTabChanged,
           );
   }
@@ -139,19 +169,19 @@ Widget portFolioScaffold({
   required BuildContext context,
   required List projects,
   required int currentIndex,
-  required Function(int) onTabChanged,
+  required TabController tabController,
 }) {
   return Scaffold(
     backgroundColor: Colors.white,
     appBar: AppBar(
-      title: Text("My Portfolio"),
+      title: const Text("My Portfolio"),
       backgroundColor: Theme.of(context).colorScheme.primary,
       foregroundColor: Colors.white,
     ),
     body: buildPortfolioBody(
       context: context,
       projects: projects,
-      onTabChanged: onTabChanged,
+      tabController: tabController,
     ),
     floatingActionButton: currentIndex == 0
         ? FloatingActionButton(
@@ -167,51 +197,35 @@ Widget portFolioScaffold({
 Widget buildPortfolioBody({
   context,
   projects,
+  required TabController tabController,
   ValueChanged<int>? onTabChanged,
 }) {
-  return DefaultTabController(
-    length: 3,
-    child: Builder(
-      builder: (context) {
-        final controller = DefaultTabController.of(context);
-        controller.addListener(() {
-          if (!controller.indexIsChanging && onTabChanged != null) {
-            onTabChanged(controller.index); // kirim index balik
-          }
-        });
-
-        return Column(
+  tabController.addListener(() {
+    if (!tabController.indexIsChanging && onTabChanged != null) {
+      onTabChanged(tabController.index); // kirim index balik
+    }
+  });
+  return Column(
+    children: [
+      TabBar(
+        controller: tabController,
+        tabs: const [
+          Tab(text: 'All'),
+          Tab(text: 'Web Projects'),
+          Tab(text: 'Mobile App'),
+        ],
+      ),
+      Expanded(
+        child: TabBarView(
+          controller: tabController,
           children: [
-            const TabBar(
-              tabs: [
-                Tab(text: 'All'),
-                Tab(text: 'Web Projects'),
-                Tab(text: 'Mobile App'),
-              ],
-            ),
-            Expanded(
-              child: TabBarView(
-                children: [
-                  buildProjectGrid(context: context, projects: projects),
-                  buildProjectGrid(
-                    context: context,
-                    projects: projects
-                        .where((p) => p.category == 'Web Development')
-                        .toList(),
-                  ),
-                  buildProjectGrid(
-                    context: context,
-                    projects: projects
-                        .where((p) => p.category == 'Mobile App')
-                        .toList(),
-                  ),
-                ],
-              ),
-            ),
+            buildProjectGrid(context: context, projects: projects),
+            buildProjectGrid(context: context, projects: projects),
+            buildProjectGrid(context: context, projects: projects),
           ],
-        );
-      },
-    ),
+        ),
+      ),
+    ],
   );
 }
 
@@ -221,6 +235,8 @@ Widget buildProjectGrid({
 }) {
   return LayoutBuilder(
     builder: (context, constraints) {
+      bool isLoading = context.read<ProjectFormProvider>().isLoading;
+      String? errorMessage = context.read<ProjectFormProvider>().errorMessage;
       final screenWidth = constraints.maxWidth;
 
       int crossAxisCount;
@@ -237,7 +253,19 @@ Widget buildProjectGrid({
       final itemHeight = 501.0; // tinggi fix
       final childAspectRatio = itemWidth / itemHeight;
 
-      return projects.isNotEmpty
+      return isLoading
+          ? Center(child: CircularProgressIndicator())
+          : errorMessage != null
+          ? Center(
+              child: Text(
+                errorMessage,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            )
+          : projects.isNotEmpty
           ? SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: MasonryGridView.count(
