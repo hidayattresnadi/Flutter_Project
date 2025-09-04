@@ -4,7 +4,7 @@ import 'package:my_portfolio_app/models/project_form_model.dart';
 import 'package:my_portfolio_app/models/project_model.dart';
 
 class PortfolioService {
-  static const String baseUrl = 'http://10.0.2.2:3000/portfolios';
+  static const String baseUrl = 'http://10.0.2.2:3000/api/portfolios';
 
   // Fetch todos from the API
   static Future<List<Project>> fetchPortfolios({String? category}) async {
