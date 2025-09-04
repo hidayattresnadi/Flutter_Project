@@ -24,11 +24,22 @@ class PortfolioService {
   //Add a new project
   static Future<void> addPortolio(ProjectForm project) async {
     try {
-      final response = await http.post(
-        Uri.parse(baseUrl),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode(project.toJson()),
-      );
+      var request = http.MultipartRequest("POST", Uri.parse(baseUrl));
+
+      if (project.imagePath != null && project.imagePath!.isNotEmpty) {
+        request.files.add(
+          await http.MultipartFile.fromPath("file", project.imagePath!),
+        );
+      }
+      // tambahin field JSON (ubah ke string)
+      project.toJson().forEach((key, value) {
+        if (value != null) {
+          request.fields[key] = value.toString();
+        }
+      });
+
+      var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
 
       if (response.statusCode == 201) {
         return;

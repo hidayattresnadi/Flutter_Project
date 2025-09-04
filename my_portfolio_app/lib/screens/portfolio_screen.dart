@@ -19,8 +19,8 @@ Widget buildProjectCard(BuildContext context, Project project) {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
-            child: Image.file(
-              File(project.imagePath!),
+            child: Image.network(
+              project.imagePath,
               height: 200,
               width: double.infinity,
               fit: BoxFit.cover,

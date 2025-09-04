@@ -28,7 +28,7 @@ class Project {
       description: json['description'],
       link: json['project_link'],
       technologies: json['technologies'],
-      imagePath: json['image_path'],
+      imagePath: 'http://10.0.2.2:3000${json['image_path']}',
     );
   }
 }
