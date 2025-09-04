@@ -38,8 +38,6 @@ class _HomeScreenState extends State<HomeScreen> {
     final profile = context.watch<ProfileFormProvider>().profileData;
     final attendanceProvider = context.watch<AttendanceRecordProvider>();
     final listAttendanceRecords = attendanceProvider.lastRecord;
-    final isLoading = attendanceProvider.isLoading;
-    final errorMessage = attendanceProvider.errorMessage;
 
     String formattedDate = DateFormat(
       'EEE, d MMM',
@@ -141,10 +139,27 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     if (!context.mounted) return;
                     if (shouldUpdate == true) {
-                      await context
+                      bool success = await context
                           .read<AttendanceRecordProvider>()
                           .addAttendance();
-                      Fluttertoast.showToast(msg: 'success clock in');
+                      if (success) {
+                        Fluttertoast.showToast(
+                          msg: 'success clock in',
+                          backgroundColor: Colors.green,
+                          textColor: Colors.white,
+                        );
+                      } else {
+                        if (context.mounted) {
+                          final errorMessage = context
+                              .read<AttendanceRecordProvider>()
+                              .errorMessage;
+                          Fluttertoast.showToast(
+                            msg: '$errorMessage',
+                            backgroundColor: Colors.red,
+                            textColor: Colors.white,
+                          );
+                        }
+                      }
                     }
                   }
                 },
@@ -198,10 +213,25 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   if (!context.mounted) return;
                   if (shouldUpdate == true) {
-                    await context
+                    bool success = await context
                         .read<AttendanceRecordProvider>()
                         .updateAttandance();
-                    Fluttertoast.showToast(msg: 'success clock out');
+                    if (success) {
+                      Fluttertoast.showToast(
+                        msg: 'success clock out',
+                        backgroundColor: Colors.green,
+                        textColor: Colors.white,
+                      );
+                    } else {
+                      final errorMessage = context
+                          .read<AttendanceRecordProvider>()
+                          .errorMessage;
+                      Fluttertoast.showToast(
+                        msg: '$errorMessage',
+                        backgroundColor: Colors.red,
+                        textColor: Colors.white,
+                      );
+                    }
                   }
                 },
               ),
