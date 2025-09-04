@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hr_attendance_tracker/models/menu_model.dart';
@@ -13,16 +12,34 @@ import 'package:hr_attendance_tracker/widgets/clock_in_button.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() {
+    final provider = context.read<AttendanceRecordProvider>();
+
+    return provider.fetchAttendances(); // All
+  }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final profile = context.watch<ProfileFormProvider>().profileData;
-    final listAttendanceRecords = context
-        .watch<AttendanceRecordProvider>()
-        .attendanceRecords;
+    final attendanceProvider = context.watch<AttendanceRecordProvider>();
+    final listAttendanceRecords = attendanceProvider.lastRecord;
+    final isLoading = attendanceProvider.isLoading;
+    final errorMessage = attendanceProvider.errorMessage;
 
     String formattedDate = DateFormat(
       'EEE, d MMM',
@@ -66,7 +83,7 @@ class HomeScreen extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        today == listAttendanceRecords.last.date
+                        today == listAttendanceRecords?.date
                             ? 'Have a great day at work!'
                             : 'Begin another great day by clocking in.',
                         style: TextStyle(
@@ -88,7 +105,8 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(height: 30),
 
             // ===== Clock In Card =====
-            if (today != listAttendanceRecords.last.date)
+            if (listAttendanceRecords == null ||
+                today != listAttendanceRecords.date)
               AttendanceCard(
                 dateText: formattedDate,
                 timeText: formattedTime,
@@ -96,31 +114,67 @@ class HomeScreen extends StatelessWidget {
                 buttonText: 'Clock in',
                 buttonColor: Colors.green,
                 showButton: true,
-                onPressed: () {
+                onPressed: () async {
                   final now = DateTime.now();
                   if (now.hour < 9 || (now.hour == 9 && now.minute == 0)) {
                     // Before 9:00
                   } else {
-                    context.read<AttendanceRecordProvider>().addAttendance();
-                    Fluttertoast.showToast(msg: 'success clock in');
+                    final shouldUpdate = await showDialog<bool>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: const Text('Clock in'),
+                        content: const Text(
+                          'Are you sure you want to clock in?',
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(ctx).pop(false),
+                            child: const Text('Cancel'),
+                          ),
+                          ElevatedButton(
+                            onPressed: () => Navigator.of(ctx).pop(true),
+                            child: const Text('Confirm'),
+                          ),
+                        ],
+                      ),
+                    );
+
+                    if (!context.mounted) return;
+                    if (shouldUpdate == true) {
+                      await context
+                          .read<AttendanceRecordProvider>()
+                          .addAttendance();
+                      Fluttertoast.showToast(msg: 'success clock in');
+                    }
                   }
                 },
+                // onPressed: () async {
+                //   final now = DateTime.now();
+                //   if (now.hour < 9 || (now.hour == 9 && now.minute == 0)) {
+                //     // Before 9:00
+                //   } else {
+                //     await context
+                //         .read<AttendanceRecordProvider>()
+                //         .addAttendance();
+                //     Fluttertoast.showToast(msg: 'success clock in');
+                //   }
+                // },
               ),
 
             // ===== Clock Out Card =====
-            if (today == listAttendanceRecords.last.date)
+            if (today == listAttendanceRecords?.date)
               AttendanceCard(
                 dateText: formattedDateOut,
-                loggedHours: listAttendanceRecords.isNotEmpty
-                    ? listAttendanceRecords.last.workDuration
+                loggedHours: listAttendanceRecords != null
+                    ? listAttendanceRecords.workDuration
                     : '-',
                 sinceText:
-                    'Since first in at ${listAttendanceRecords.last.checkIn}',
+                    'Since first in at ${listAttendanceRecords?.checkIn}',
                 workingHours: 'Starts 9:00AM-10:00AM & Ends 6:00PM-7:00PM',
                 buttonText: 'Clock out',
                 buttonColor: Colors.red,
                 autoSizeDate: true,
-                showButton: listAttendanceRecords.last.checkOut == '-',
+                showButton: listAttendanceRecords?.checkOut == '-',
                 onPressed: () async {
                   final shouldUpdate = await showDialog<bool>(
                     context: context,
@@ -144,7 +198,9 @@ class HomeScreen extends StatelessWidget {
 
                   if (!context.mounted) return;
                   if (shouldUpdate == true) {
-                    context.read<AttendanceRecordProvider>().updateAttandance();
+                    await context
+                        .read<AttendanceRecordProvider>()
+                        .updateAttandance();
                     Fluttertoast.showToast(msg: 'success clock out');
                   }
                 },

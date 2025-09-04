@@ -137,15 +137,35 @@ class AttendanceItem extends StatelessWidget {
   }
 }
 
-class AttendanceHistoryScreen extends StatelessWidget {
+class AttendanceHistoryScreen extends StatefulWidget {
   final bool withScaffold;
-  const AttendanceHistoryScreen({super.key, this.withScaffold = false});
+
+  const AttendanceHistoryScreen({this.withScaffold = false, super.key});
+
+  @override
+  State<AttendanceHistoryScreen> createState() => _AttendanceScreenState();
+}
+
+class _AttendanceScreenState extends State<AttendanceHistoryScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() {
+    final provider = context.read<AttendanceRecordProvider>();
+
+    return provider.fetchAttendances(); // All
+  }
 
   @override
   Widget build(BuildContext context) {
     Widget content = buildTabAttendanceLog(context);
 
-    return withScaffold == true ? attendanceScreenScaffold(context) : content;
+    return widget.withScaffold == true
+        ? attendanceScreenScaffold(context)
+        : content;
   }
 }
 
@@ -207,126 +227,147 @@ Widget _buildSummaryItem(String label, String count) {
 }
 
 Widget attendanceScreenBody(BuildContext context) {
-  final listAttendanceRecords = context
-      .watch<AttendanceRecordProvider>()
-      .attendanceRecords;
+  final attendanceProvider = context.watch<AttendanceRecordProvider>();
 
-  return SingleChildScrollView(
-    padding: const EdgeInsets.all(20),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Month Dropdown
-        MonthDropdown(),
+  final listAttendanceRecords = attendanceProvider.attendanceRecords;
+  final isLoading = attendanceProvider.isLoading;
+  final errorMessage = attendanceProvider.errorMessage;
 
-        const SizedBox(height: 16),
-        // Summary Card (Grid)
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final screenWidth = constraints.maxWidth;
-                final crossAxisCount = 3;
-                final spacing = 8 * (crossAxisCount - 1);
-                final itemWidth = (screenWidth - spacing) / crossAxisCount;
-                final itemHeight = 60.0;
-                final childAspectRatio = itemWidth / itemHeight;
-
-                return GridView.count(
-                  crossAxisCount: crossAxisCount,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  crossAxisSpacing: 8,
-                  mainAxisSpacing: 8,
-                  childAspectRatio: childAspectRatio,
-                  children: [
-                    _buildSummaryItem('Absent', '13'),
-                    _buildSummaryItem('Late clock in', '13'),
-                    _buildSummaryItem('Early clock in', '13'),
-                    _buildSummaryItem('No clock in', '13'),
-                    _buildSummaryItem('No clock out', '13'),
-                  ],
-                );
-              },
-            ),
+  return isLoading
+      ? Center(child: CircularProgressIndicator())
+      : errorMessage != null
+      ? Center(
+          child: Text(
+            errorMessage,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-        ),
-
-        const SizedBox(height: 16),
-
-        // Attendance List Card
-        Card(
+        )
+      : listAttendanceRecords.isNotEmpty
+      ? SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Table Header
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8.0,
-                  vertical: 20,
-                ),
-                child: Row(
-                  children: const [
-                    Expanded(
-                      flex: 2,
-                      child: Text(
-                        'Date',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: Text(
-                        'In Time',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: Text(
-                        'Out Time',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: Text(
-                        'Status',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ],
+              // Month Dropdown
+              MonthDropdown(),
+
+              const SizedBox(height: 16),
+              // Summary Card (Grid)
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final screenWidth = constraints.maxWidth;
+                      final crossAxisCount = 3;
+                      final spacing = 8 * (crossAxisCount - 1);
+                      final itemWidth =
+                          (screenWidth - spacing) / crossAxisCount;
+                      final itemHeight = 60.0;
+                      final childAspectRatio = itemWidth / itemHeight;
+
+                      return GridView.count(
+                        crossAxisCount: crossAxisCount,
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        crossAxisSpacing: 8,
+                        mainAxisSpacing: 8,
+                        childAspectRatio: childAspectRatio,
+                        children: [
+                          _buildSummaryItem('Absent', '13'),
+                          _buildSummaryItem('Late clock in', '13'),
+                          _buildSummaryItem('Early clock in', '13'),
+                          _buildSummaryItem('No clock in', '13'),
+                          _buildSummaryItem('No clock out', '13'),
+                        ],
+                      );
+                    },
+                  ),
                 ),
               ),
-              // const SizedBox(height: 40),
-              Divider(thickness: 1),
-              // List attendance
-              ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: listAttendanceRecords.length,
-                itemBuilder: (context, index) {
-                  return AttendanceItem(record: listAttendanceRecords[index]);
-                },
-                separatorBuilder: (context, index) {
-                  return const Divider(
-                    thickness: 1,
-                    color: Colors.grey,
-                    height: 20, // jarak vertikal
-                  );
-                },
+
+              const SizedBox(height: 16),
+
+              // Attendance List Card
+              Card(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Table Header
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8.0,
+                        vertical: 20,
+                      ),
+                      child: Row(
+                        children: const [
+                          Expanded(
+                            flex: 2,
+                            child: Text(
+                              'Date',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                          Expanded(
+                            flex: 1,
+                            child: Text(
+                              'In Time',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                          Expanded(
+                            flex: 1,
+                            child: Text(
+                              'Out Time',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                          Expanded(
+                            flex: 1,
+                            child: Text(
+                              'Status',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // const SizedBox(height: 40),
+                    Divider(thickness: 1),
+                    // List attendance
+                    ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: listAttendanceRecords.length,
+                      itemBuilder: (context, index) {
+                        return AttendanceItem(
+                          record: listAttendanceRecords[index],
+                        );
+                      },
+                      separatorBuilder: (context, index) {
+                        return const Divider(
+                          thickness: 1,
+                          color: Colors.grey,
+                          height: 20, // jarak vertikal
+                        );
+                      },
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
-        ),
-      ],
-    ),
-  );
+        )
+      : const Center(
+          child: Text(
+            'No attendance history yet',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+        );
 }
 
 Widget buildTabAttendanceLog(BuildContext context) {

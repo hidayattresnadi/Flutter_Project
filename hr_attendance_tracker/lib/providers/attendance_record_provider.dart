@@ -1,82 +1,75 @@
 import 'package:flutter/material.dart';
 import 'package:hr_attendance_tracker/models/attendance_record_model.dart';
+import 'package:hr_attendance_tracker/services/attendance_service.dart';
 import 'package:intl/intl.dart';
 
 class AttendanceRecordProvider extends ChangeNotifier {
-  final List<AttendanceRecord> _attendanceRecords = [
-    AttendanceRecord(
-      date: 'Aug 1, 2025',
-      day: 'Monday',
-      checkIn: '08:00',
-      checkOut: '17:00',
-      status: 'Present',
-    ),
-    AttendanceRecord(
-      date: 'Aug 2, 2025',
-      day: 'Monday',
-      checkIn: '08:05',
-      checkOut: '17:10',
-      status: 'Present',
-    ),
-    AttendanceRecord(
-      date: 'Aug 3, 2025',
-      day: 'Monday',
-      checkIn: '08:15',
-      checkOut: '16:50',
-      status: 'Present',
-    ),
-    AttendanceRecord(
-      date: 'Aug 4, 2025',
-      day: 'Monday',
-      checkIn: '-',
-      checkOut: '-',
-      status: 'Absent',
-    ),
-    AttendanceRecord(
-      date: 'Aug 5, 2025',
-      day: 'Monday',
-      checkIn: '08:10',
-      checkOut: '17:00',
-      status: 'Present',
-    ),
-    AttendanceRecord(
-      date: 'Aug 6, 2025',
-      day: 'Monday',
-      checkIn: '08:20',
-      checkOut: '17:30',
-      status: 'Present',
-    ),
-    AttendanceRecord(
-      date: 'Aug 7, 2025',
-      day: 'Monday',
-      checkIn: '-',
-      checkOut: '-',
-      status: 'Absent',
-    ),
-  ];
+  List<AttendanceRecord> _attendanceRecords = [];
+  String? _errorMessage;
+  bool _isLoading = false;
+  AttendanceRecord? _lastRecord;
 
+  String? get errorMessage => _errorMessage;
+  bool get isLoading => _isLoading;
   List<AttendanceRecord> get attendanceRecords => _attendanceRecords;
-  void addAttendance() {
-    String today = DateFormat('MMM d, yyyy').format(DateTime.now());
-    String dayName = DateFormat('EEEE').format(DateTime.now());
-    String time24 = DateFormat('HH:mm').format(DateTime.now());
+  AttendanceRecord? get lastRecord => _lastRecord;
 
-    _attendanceRecords.add(
-      AttendanceRecord(
+  // get all data from API
+  Future<void> fetchAttendances() async {
+    _errorMessage = null;
+    _isLoading = true;
+    _attendanceRecords = [];
+
+    await Future.delayed(const Duration(seconds: 2));
+    try {
+      _attendanceRecords = await AttendanceService.fetchAttendances();
+      _lastRecord = _attendanceRecords.isNotEmpty
+          ? _attendanceRecords.last
+          : null;
+    } catch (e) {
+      _errorMessage = e.toString();
+    }
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  // Add Attendance (clock in)
+  Future<bool> addAttendance() async {
+    try {
+      String today = DateFormat('MMM d, yyyy').format(DateTime.now());
+      String dayName = DateFormat('EEEE').format(DateTime.now());
+      String time24 = DateFormat('HH:mm').format(DateTime.now());
+
+      AttendanceRecord attendanceRecord = AttendanceRecord(
         date: today,
         day: dayName,
         checkIn: time24,
         checkOut: '-',
         status: 'Present',
-      ),
-    );
-    notifyListeners();
+        employeeId: 1,
+      );
+
+      await AttendanceService.addAttendance(attendanceRecord);
+      await fetchAttendances();
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+      return false;
+    }
   }
 
-  void updateAttandance() {
-    int index = _attendanceRecords.length - 1;
-    String time24 = DateFormat('HH:mm').format(DateTime.now());
-    _attendanceRecords[index].checkOut = time24;
-    notifyListeners();
+  // Update Attendance (clock out)
+  Future<bool> updateAttandance() async {
+    try {
+      String time24 = DateFormat('HH:mm').format(DateTime.now());
+      await AttendanceService.updateAttendance(time24);
+      await fetchAttendances();
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+      return false;
+    }
   }
 }

@@ -66,14 +66,17 @@ class _MainScreenState extends State<MainScreen> {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              _titles[_currentIndex],
-              style: GoogleFonts.pacifico(
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                fontSize: 20,
+            Expanded(
+              child: Text(
+                _titles[_currentIndex],
+                style: GoogleFonts.pacifico(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  fontSize: 20,
+                ),
               ),
             ),
+
             Text(
               DateFormat('MMMM dd, yyyy').format(DateTime.now()),
               style: TextStyle(

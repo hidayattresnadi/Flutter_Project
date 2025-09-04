@@ -1,18 +1,22 @@
 import 'package:intl/intl.dart';
 
 class AttendanceRecord {
+  int? id;
   String date;
   String day;
   String checkIn;
   String checkOut;
   String status;
+  int employeeId;
 
   AttendanceRecord({
+    this.id,
     required this.date,
     required this.day,
     required this.checkIn,
     required this.checkOut,
     required this.status,
+    required this.employeeId,
   });
 
   String get workDuration {
@@ -71,5 +75,29 @@ class AttendanceRecord {
 
     // biar ga lebih dari 1.0 atau kurang dari 0.0
     return progress.clamp(0.0, 1.0);
+  }
+
+  // Fungsi untuk mengubah data JSON menjadi objek Todo
+  factory AttendanceRecord.fromJson(Map<String, dynamic> json) {
+    return AttendanceRecord(
+      id: json['attendance_id'],
+      date: json['attendance_date'],
+      day: json['day_name'],
+      checkIn: json['check_in'],
+      checkOut: json['check_out'],
+      status: json['status'],
+      employeeId: json['employee_id'],
+    );
+  }
+  // Fungsi untuk mengubah objek attendance menjadi format JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'attendance_date': date,
+      'day_name': day,
+      'check_in': checkIn,
+      'check_out': checkOut,
+      'status': status,
+      'employee_id': 1,
+    };
   }
 }

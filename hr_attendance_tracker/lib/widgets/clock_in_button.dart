@@ -35,7 +35,7 @@ class AttendanceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final listAttendanceRecords = context
         .watch<AttendanceRecordProvider>()
-        .attendanceRecords;
+        .lastRecord;
     String today = DateFormat('MMM d, yyyy').format(DateTime.now());
     return Card(
       child: Container(
@@ -112,9 +112,9 @@ class AttendanceCard extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             LinearProgressIndicator(
-              value: today != listAttendanceRecords.last.date
+              value: today != listAttendanceRecords?.date
                   ? 0
-                  : listAttendanceRecords.last.workProgress,
+                  : listAttendanceRecords?.workProgress,
               minHeight: 10,
               backgroundColor: Colors.grey[300],
               color: Colors.blue,
