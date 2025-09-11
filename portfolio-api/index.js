@@ -11,18 +11,21 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // GET all portfolios, optional query: category=Mobile App
-app.get("/api/portfolios", async (req, res) => {
+app.get("/api/portfolios/:userId", async (req, res) => {
   try {
     const { category } = req.query;
+    const { userId } = req.params;
     let result;
 
     if (category) {
       result = await pool.query(
-        "SELECT * FROM portfolios WHERE category = $1",
-        [category]
+        "SELECT * FROM portfolios WHERE category = $1 and uid = $2",
+        [category, userId]
       );
     } else {
-      result = await pool.query("SELECT * FROM portfolios");
+      result = await pool.query("SELECT * FROM portfolios WHERE uid = $1", [
+        userId,
+      ]);
     }
 
     res.json(result.rows);
@@ -68,8 +71,9 @@ app.delete("/api/portfolios/:id", async (req, res) => {
 });
 
 //POST create new portfolio
-app.post("/api/portfolios", upload.single("file"), async (req, res) => {
+app.post("/api/portfolios/:userId", upload.single("file"), async (req, res) => {
   try {
+    const { userId } = req.params;
     const {
       title,
       category,
@@ -91,8 +95,8 @@ app.post("/api/portfolios", upload.single("file"), async (req, res) => {
 
     const result = await pool.query(
       `INSERT INTO portfolios 
-       (title, category, completion_date, description, project_link, technologies, image_path) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7) 
+       (title, category, completion_date, description, project_link, technologies, image_path, uid) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
        RETURNING *`,
       [
         title,
@@ -102,6 +106,7 @@ app.post("/api/portfolios", upload.single("file"), async (req, res) => {
         project_link,
         technologies,
         imagePath,
+        userId,
       ]
     );
 

@@ -32,7 +32,7 @@ class ProjectFormProvider with ChangeNotifier {
   }
 
   // get all data from API
-  Future<void> fetchPortfolios({String? category}) async {
+  Future<void> fetchPortfolios({String? category, String? uid}) async {
     _errorMessage = null;
     _isLoading = true;
     _projects = [];
@@ -41,7 +41,10 @@ class ProjectFormProvider with ChangeNotifier {
     // notifyListeners();
 
     try {
-      _projects = await PortfolioService.fetchPortfolios(category: category);
+      _projects = await PortfolioService.fetchPortfolios(
+        category: category,
+        uid: uid,
+      );
     } catch (e) {
       _errorMessage = e.toString();
     }
@@ -96,14 +99,14 @@ class ProjectFormProvider with ChangeNotifier {
   }
 
   // Add Project
-  Future<bool> addProject() async {
+  Future<bool> addProject(String? userId) async {
     try {
       formData.title = titleController.text;
       formData.description = descriptionController.text;
       formData.link = linkController.text;
       formData.technologies = techController.text;
-      await PortfolioService.addPortolio(formData);
-      await fetchPortfolios();
+      await PortfolioService.addPortolio(formData, userId);
+      await fetchPortfolios(uid: userId);
       return true;
     } catch (e) {
       _errorMessage = e.toString();

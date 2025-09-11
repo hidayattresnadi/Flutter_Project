@@ -7,8 +7,11 @@ class PortfolioService {
   static const String baseUrl = 'http://10.0.2.2:3000/api/portfolios';
 
   // Fetch todos from the API
-  static Future<List<Project>> fetchPortfolios({String? category}) async {
-    Uri uri = Uri.parse(baseUrl);
+  static Future<List<Project>> fetchPortfolios({
+    String? category,
+    String? uid,
+  }) async {
+    Uri uri = Uri.parse("$baseUrl/$uid");
     if (category != null) {
       uri = uri.replace(queryParameters: {'category': category});
     }
@@ -22,9 +25,10 @@ class PortfolioService {
   }
 
   //Add a new project
-  static Future<void> addPortolio(ProjectForm project) async {
+  static Future<void> addPortolio(ProjectForm project, String? uid) async {
     try {
-      var request = http.MultipartRequest("POST", Uri.parse(baseUrl));
+      Uri uri = Uri.parse("$baseUrl/$uid");
+      var request = http.MultipartRequest("POST", uri);
 
       if (project.imagePath != null && project.imagePath!.isNotEmpty) {
         request.files.add(

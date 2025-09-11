@@ -1,7 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:my_portfolio_app/models/project_model.dart';
+import 'package:my_portfolio_app/provider/profile_provider.dart';
 import 'package:my_portfolio_app/provider/project_provider.dart';
 import 'package:my_portfolio_app/routes.dart';
 import 'package:provider/provider.dart';
@@ -134,14 +133,18 @@ class _PortfolioScreenState extends State<PortfolioScreen>
 
   Future<void> _loadDataForTab(int index) {
     final provider = context.read<ProjectFormProvider>();
+    final userId = context.read<ProfileProvider>().profile?.uid;
 
     switch (index) {
       case 1:
-        return provider.fetchPortfolios(category: "Web Development");
+        return provider.fetchPortfolios(
+          category: "Web Development",
+          uid: userId,
+        );
       case 2:
-        return provider.fetchPortfolios(category: "Mobile App");
+        return provider.fetchPortfolios(category: "Mobile App", uid: userId);
       default:
-        return provider.fetchPortfolios(); // All
+        return provider.fetchPortfolios(uid: userId); // All
     }
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:my_portfolio_app/provider/profile_provider.dart';
 import 'package:my_portfolio_app/provider/project_provider.dart';
 import 'package:my_portfolio_app/widgets/image_picker_form.dart';
 import 'package:provider/provider.dart';
@@ -10,6 +11,7 @@ class PortfolioFormScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final portfolioFormProvider = Provider.of<ProjectFormProvider>(context);
+    final userId = context.read<ProfileProvider>().profile?.uid;
     final dateFormat = DateFormat('yyyy-MM-dd');
 
     return Scaffold(
@@ -349,7 +351,7 @@ class PortfolioFormScreen extends StatelessWidget {
                               if (portfolioFormProvider.validateForm()) {
                                 bool success = await context
                                     .read<ProjectFormProvider>()
-                                    .addProject();
+                                    .addProject(userId);
                                 if (success) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(

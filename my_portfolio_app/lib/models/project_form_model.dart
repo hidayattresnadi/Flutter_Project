@@ -1,5 +1,3 @@
-import 'package:my_portfolio_app/models/project_model.dart';
-
 class ProjectForm {
   String title;
   String? category;
@@ -18,19 +16,7 @@ class ProjectForm {
     this.technologies = '',
   });
 
-  // Project toProject() {
-  //   return Project(
-  //     title: title,
-  //     category: category ?? "Uncategorized",
-  //     completionDate: completionDate ?? DateTime.now(),
-  //     description: description,
-  //     link: link,
-  //     technologies: technologies ?? "Unknown",
-  //     imagePath: imagePath ?? "assets/images/default.png",
-  //   );
-  // }
-
-  // Fungsi untuk mengubah objek Todo menjadi format JSON
+  // Fungsi untuk mengubah objek project menjadi format JSON
   Map<String, dynamic> toJson() {
     return {
       'title': title,

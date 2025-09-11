@@ -8,7 +8,8 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final profile = context.watch<ProfileProvider>().profile;
+    final profileProvider = Provider.of<ProfileProvider>(context);
+    final profile = profileProvider.profile;
     return SafeArea(
       child: SingleChildScrollView(
         child: Padding(
@@ -16,13 +17,21 @@ class ProfileScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              buildProfileHeader(profile.name, profile.profession),
+              buildProfileHeader(
+                profile?.name,
+                profile?.profession,
+                profile?.photo,
+              ),
               Divider(height: 24),
               buildMyPortfolio(context),
               SizedBox(height: 30),
-              buildProfileInfo(profile.email, profile.phone, profile.address),
+              buildProfileInfo(
+                profile?.email,
+                profile?.phone,
+                profile?.address,
+              ),
               SizedBox(height: 30),
-              buildProfileBio(profile.bio),
+              buildProfileBio(profile?.bio),
               SizedBox(height: 30),
             ],
           ),
@@ -32,12 +41,13 @@ class ProfileScreen extends StatelessWidget {
   }
 }
 
-Widget buildProfileHeader(String name, String profession) {
+Widget buildProfileHeader(String? name, String? profession, String? photo) {
   return Row(
     children: [
       CircleAvatar(
         radius: 55,
-        backgroundImage: AssetImage('assets/profile.jpg'),
+        backgroundImage: photo != null ? NetworkImage(photo) : null,
+        child: photo == null ? const Icon(Icons.person, size: 55) : null,
       ),
       SizedBox(width: 15),
       Expanded(
@@ -45,13 +55,13 @@ Widget buildProfileHeader(String name, String profession) {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              name,
+              name ?? "No name provided",
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               softWrap: true,
               overflow: TextOverflow.visible,
             ),
             Text(
-              profession,
+              profession ?? "Not specified",
               style: TextStyle(
                 fontSize: 18,
                 color: Colors.grey[600],
@@ -103,7 +113,7 @@ Widget buildMyPortfolio(BuildContext context) {
   );
 }
 
-Widget buildProfileInfo(String email, String phone, String address) {
+Widget buildProfileInfo(String? email, String? phone, String? address) {
   return Card(
     color: Colors.black,
     child: Column(
@@ -128,21 +138,21 @@ Widget buildProfileInfo(String email, String phone, String address) {
         Divider(height: 0, thickness: 2, color: Colors.white),
         buildReusableColumn(
           icon: Icons.email,
-          label: email,
+          label: email ?? "No enail provided",
           padding: 25.0,
           topPadding: 25.0,
         ),
         Divider(height: 0, thickness: 2, color: Colors.white),
         buildReusableColumn(
           icon: Icons.phone,
-          label: phone,
+          label: phone ?? "Unknown",
           padding: 25.0,
           topPadding: 25.0,
         ),
         Divider(height: 0, thickness: 2, color: Colors.white),
         buildReusableColumn(
           icon: Icons.location_on,
-          label: address,
+          label: address ?? "Not specified",
           padding: 25.0,
           topPadding: 25.0,
         ),
@@ -151,7 +161,7 @@ Widget buildProfileInfo(String email, String phone, String address) {
   );
 }
 
-Widget buildProfileBio(String bio) {
+Widget buildProfileBio(String? bio) {
   return Card(
     color: Colors.black,
     child: Column(
@@ -180,7 +190,10 @@ Widget buildProfileBio(String bio) {
             right: 25.0,
             bottom: 15.0,
           ),
-          child: Text(bio, style: TextStyle(fontSize: 20, color: Colors.white)),
+          child: Text(
+            bio ?? 'No bio provided',
+            style: TextStyle(fontSize: 20, color: Colors.white),
+          ),
         ),
       ],
     ),

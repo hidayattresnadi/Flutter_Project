@@ -9,7 +9,8 @@ class ContactScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final profile = context.watch<ProfileProvider>().profile;
+    final profileProvider = Provider.of<ProfileProvider>(context);
+    final profile = profileProvider.profile;
     return SafeArea(
       child: SingleChildScrollView(
         child: Padding(
@@ -18,10 +19,18 @@ class ContactScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              buildProfileHeader(profile.name, profile.profession),
+              buildProfileHeader(
+                profile?.name,
+                profile?.profession,
+                profile?.photo,
+              ),
               Divider(height: 24),
               SizedBox(height: MediaQuery.of(context).size.height * 0.03),
-              buildProfileInfo(profile.email, profile.phone, profile.address),
+              buildProfileInfo(
+                profile?.email,
+                profile?.phone,
+                profile?.address,
+              ),
             ],
           ),
         ),
@@ -30,12 +39,13 @@ class ContactScreen extends StatelessWidget {
   }
 }
 
-Widget buildProfileHeader(String name, String profession) {
+Widget buildProfileHeader(String? name, String? profession, String? photo) {
   return Row(
     children: [
       CircleAvatar(
         radius: 55,
-        backgroundImage: AssetImage('assets/profile.jpg'),
+        backgroundImage: photo != null ? NetworkImage(photo) : null,
+        child: photo == null ? const Icon(Icons.person, size: 55) : null,
       ),
       SizedBox(width: 15),
       Expanded(
@@ -43,13 +53,13 @@ Widget buildProfileHeader(String name, String profession) {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              name,
+              name ?? "No name provided",
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               softWrap: true,
               overflow: TextOverflow.visible,
             ),
             Text(
-              profession,
+              profession ?? "Not specified",
               style: TextStyle(
                 fontSize: 18,
                 color: Colors.grey[600],
@@ -63,14 +73,22 @@ Widget buildProfileHeader(String name, String profession) {
   );
 }
 
-Widget buildProfileInfo(String email, String phone, String address) {
+Widget buildProfileInfo(String? email, String? phone, String? address) {
   return Column(
     children: [
-      buildPaddingContact(icon: Icons.email, info: email, color: Colors.blue),
-      buildPaddingContact(icon: Icons.phone, info: phone, color: Colors.green),
+      buildPaddingContact(
+        icon: Icons.email,
+        info: email ?? "No enail provided",
+        color: Colors.blue,
+      ),
+      buildPaddingContact(
+        icon: Icons.phone,
+        info: phone ?? "Unknown",
+        color: Colors.green,
+      ),
       buildPaddingContact(
         icon: Icons.location_on,
-        info: address,
+        info: address ?? "Not specified",
         color: Colors.red,
       ),
       buildPaddingContact(
