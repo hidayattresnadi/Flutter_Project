@@ -34,11 +34,6 @@ void main() async {
     anonKey: dotenv.env['API_KEY_SUPABASE']!,
   );
 
-  // await sb.Supabase.initialize(
-  //   url: 'https://zdklzrfvstrhoioffvnh.supabase.co',
-  //   anonKey:
-  //       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpka2x6cmZ2c3RyaG9pb2Zmdm5oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc2NDA0MzEsImV4cCI6MjA3MzIxNjQzMX0.rbDs926PC3rMqDPcHDmA9vFhampLvuuveew48n64Bek",
-  // );
   runApp(
     MultiProvider(
       providers: [

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hr_attendance_tracker/routes.dart';
+import 'package:intl/intl.dart';
 
 class ForbiddenPage extends StatelessWidget {
   const ForbiddenPage({super.key});
@@ -8,13 +10,33 @@ class ForbiddenPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Access Denied',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        backgroundColor: Colors.amber.shade900,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Text(
+                'Access Denied',
+                style: GoogleFonts.pacifico(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  fontSize: 20,
+                ),
+              ),
+            ),
+
+            Text(
+              DateFormat('MMMM dd, yyyy').format(DateTime.now()),
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
         ),
-        centerTitle: true,
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Colors.white,
+        centerTitle: false,
+        elevation: 0,
       ),
       body: Center(
         child: Column(
