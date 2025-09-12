@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hr_attendance_tracker/providers/profile_provider.dart';
+import 'package:hr_attendance_tracker/providers/employee_provider.dart';
 import 'package:hr_attendance_tracker/widgets/image_picker_form.dart';
 import 'package:hr_attendance_tracker/widgets/text_form_field.dart';
 import 'package:intl/intl.dart';
@@ -8,7 +8,8 @@ import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:provider/provider.dart';
 
 class UpdateProfileScreen extends StatefulWidget {
-  const UpdateProfileScreen({super.key});
+  final String? employeeId;
+  const UpdateProfileScreen({super.key, this.employeeId});
 
   @override
   State<UpdateProfileScreen> createState() => FormScreenState();
@@ -20,16 +21,23 @@ class FormScreenState extends State<UpdateProfileScreen> {
     super.initState();
 
     // Panggil initForm dari provider
-    final profileFormProvider = Provider.of<ProfileFormProvider>(
+    final employeeProvider = Provider.of<EmployeeProvider>(
       context,
       listen: false,
     );
-    profileFormProvider.initForm();
+    if (widget.employeeId != null) {
+      employeeProvider.loadEmployeeEditedUser(widget.employeeId!);
+    } else {
+      final employeeId = employeeProvider.employee?.employeeId;
+      if (employeeId != null) {
+        employeeProvider.loadEmployee(employeeId);
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final profileFormProvider = Provider.of<ProfileFormProvider>(context);
+    final employeeProvider = Provider.of<EmployeeProvider>(context);
     final phoneFormatter = MaskTextInputFormatter(
       mask: '+62 ###-####-####',
       filter: {"#": RegExp(r'[0-9]')},
@@ -80,7 +88,7 @@ class FormScreenState extends State<UpdateProfileScreen> {
               child: Padding(
                 padding: const EdgeInsets.all(20),
                 child: Form(
-                  key: profileFormProvider.formKey,
+                  key: employeeProvider.formKey,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -98,17 +106,22 @@ class FormScreenState extends State<UpdateProfileScreen> {
                       const SizedBox(height: 24),
                       // Image Picker
                       ImagePickerExample(
-                        onImageSelected: (path) {
-                          profileFormProvider.formData.profilePhoto =
-                              path; // simpan ke model
+                        onImageSelected: (path) async {
+                          if (widget.employeeId != null) {
+                            employeeProvider.editEmployee?.profilePhoto = path;
+                          } else {
+                            employeeProvider.employee?.profilePhoto = path;
+                          }
                         },
-                        initialImage: profileFormProvider.formData.profilePhoto,
+                        initialImage: widget.employeeId != null
+                            ? employeeProvider.editEmployee?.profilePhoto
+                            : employeeProvider.employee?.profilePhoto,
                       ),
                       const SizedBox(height: 50),
                       // Full Name
                       CustomTextFormField(
                         label: 'Full Name',
-                        controller: profileFormProvider.fullNameController,
+                        controller: employeeProvider.fullNameController,
                         keyboardType: TextInputType.multiline,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -128,15 +141,14 @@ class FormScreenState extends State<UpdateProfileScreen> {
                           if (textEditingValue.text.isEmpty) {
                             return const Iterable<String>.empty();
                           }
-                          return profileFormProvider.previousPositionEntries
-                              .where(
-                                (name) => name.toLowerCase().startsWith(
-                                  textEditingValue.text.toLowerCase(),
-                                ),
-                              );
+                          return employeeProvider.previousPositionEntries.where(
+                            (name) => name.toLowerCase().startsWith(
+                              textEditingValue.text.toLowerCase(),
+                            ),
+                          );
                         },
                         onSelected: (String selection) {
-                          profileFormProvider.savedEmployeePosition(selection);
+                          employeeProvider.savedEmployeePosition(selection);
                         },
                         fieldViewBuilder:
                             (
@@ -147,7 +159,7 @@ class FormScreenState extends State<UpdateProfileScreen> {
                             ) {
                               // sinkronisasi controller provider dengan field controller
                               textEditingController.text =
-                                  profileFormProvider.positionController.text;
+                                  employeeProvider.positionController.text;
 
                               return TextFormField(
                                 controller: textEditingController,
@@ -161,7 +173,7 @@ class FormScreenState extends State<UpdateProfileScreen> {
                                   ),
                                 ),
                                 onChanged: (value) {
-                                  profileFormProvider.positionController.text =
+                                  employeeProvider.positionController.text =
                                       value; // sync
                                 },
                                 onFieldSubmitted: (_) => onFieldSubmitted(),
@@ -186,7 +198,9 @@ class FormScreenState extends State<UpdateProfileScreen> {
                             ),
                           ),
                         ),
-                        value: profileFormProvider.formData.department,
+                        value: widget.employeeId != null
+                            ? employeeProvider.editEmployee?.department
+                            : employeeProvider.employee?.department,
                         items: ['IT', 'HR', 'Safety', 'Analayst']
                             .map(
                               (department) => DropdownMenuItem(
@@ -195,7 +209,7 @@ class FormScreenState extends State<UpdateProfileScreen> {
                               ),
                             )
                             .toList(),
-                        onChanged: profileFormProvider.setDepartment,
+                        onChanged: employeeProvider.setDepartment,
                         validator: (value) =>
                             value == null ? 'Please select a department' : null,
                       ),
@@ -203,7 +217,7 @@ class FormScreenState extends State<UpdateProfileScreen> {
                       // email
                       CustomTextFormField(
                         label: 'Email',
-                        controller: profileFormProvider.emailController,
+                        controller: employeeProvider.emailController,
                         keyboardType: TextInputType.emailAddress,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -221,7 +235,7 @@ class FormScreenState extends State<UpdateProfileScreen> {
 
                       TextFormField(
                         inputFormatters: [phoneFormatter],
-                        controller: profileFormProvider.phoneController,
+                        controller: employeeProvider.phoneController,
                         keyboardType: TextInputType.phone,
                         decoration: InputDecoration(
                           labelText: 'Phone Number',
@@ -242,7 +256,7 @@ class FormScreenState extends State<UpdateProfileScreen> {
                       // location
                       CustomTextFormField(
                         label: 'Location',
-                        controller: profileFormProvider.locationController,
+                        controller: employeeProvider.locationController,
                         keyboardType: TextInputType.multiline,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -256,7 +270,7 @@ class FormScreenState extends State<UpdateProfileScreen> {
                       // Bio
                       CustomTextFormField(
                         label: 'Bio',
-                        controller: profileFormProvider.bioController,
+                        controller: employeeProvider.bioController,
                         keyboardType: TextInputType.multiline,
                         // maxLines: 3,
                       ),
@@ -294,7 +308,7 @@ class FormScreenState extends State<UpdateProfileScreen> {
 
                               if (!context.mounted) return;
                               if (shouldUpdate == true) {
-                                // profileFormProvider.resetForm();
+                                // employeeProvider.resetForm();
                                 Navigator.pop(context);
                               }
                             },
@@ -303,8 +317,13 @@ class FormScreenState extends State<UpdateProfileScreen> {
                           const SizedBox(width: 25),
                           ElevatedButton(
                             onPressed: () async {
-                              if (profileFormProvider.validateForm()) {
-                                await profileFormProvider.saveForm();
+                              if (employeeProvider.validateForm(
+                                widget.employeeId,
+                              )) {
+                                widget.employeeId != null
+                                    ? await employeeProvider
+                                          .updateOtherEmployee()
+                                    : await employeeProvider.updateEmployee();
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                     content: Text(
@@ -312,23 +331,29 @@ class FormScreenState extends State<UpdateProfileScreen> {
                                     ),
                                   ),
                                 );
-                                if (!profileFormProvider.previousPositionEntries
+                                if (!employeeProvider.previousPositionEntries
                                     .contains(
-                                      profileFormProvider
-                                          .positionController
-                                          .text,
+                                      employeeProvider.positionController.text,
                                     )) {
-                                  profileFormProvider.savedEmployeePosition(
-                                    profileFormProvider.positionController.text,
+                                  employeeProvider.savedEmployeePosition(
+                                    employeeProvider.positionController.text,
                                   );
                                 }
-                                // profileFormProvider.resetForm();
+                                // employeeProvider.resetForm();
                                 if (context.mounted) {
                                   Navigator.of(context).pop(false);
                                 }
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      "Please fill all fields (and select a photo if required).",
+                                    ),
+                                  ),
+                                );
                               }
                             },
-                            child: profileFormProvider.isLoading
+                            child: employeeProvider.isLoading
                                 ? const SizedBox(
                                     width: 20,
                                     height: 20,

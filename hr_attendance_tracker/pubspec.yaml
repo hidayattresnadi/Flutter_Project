@@ -44,6 +44,12 @@ dependencies:
   mask_text_input_formatter: ^2.9.0
   carousel_slider: ^5.0.0
   http: ^1.5.0
+  firebase_core: ^3.6.2
+  firebase_auth: ^5.3.2
+  google_sign_in: ^6.2.1
+  cloud_firestore: ^5.6.12
+  flutter_dotenv: ^5.1.0
+  supabase_flutter: ^2.5.0
 
 dev_dependencies:
   flutter_test:
@@ -72,6 +78,9 @@ flutter:
     - assets/images/attendance.jpg
     - assets/images/attendance_2.png
     - assets/images/handphone.png
+    - assets/images/google_logo.png
+    - assets/images/uag_logo.png
+    - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

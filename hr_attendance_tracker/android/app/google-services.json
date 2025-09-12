@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "815294600166",
+    "project_id": "hr-attendance-tracker-flutter",
+    "storage_bucket": "hr-attendance-tracker-flutter.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:815294600166:android:d0e736eeb2e52173573c27",
+        "android_client_info": {
+          "package_name": "com.example.hr_attendance_tracker"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "815294600166-ehr5mogqqqvvj64e1k29juim4jt36so8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.hr_attendance_tracker",
+            "certificate_hash": "bed838c2fb00fdf22183289ebd1ea3e287f58040"
+          }
+        },
+        {
+          "client_id": "815294600166-d5ovkeu6savf46bni2sgqaaja5m3naoj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDM1Sb6kENtwQTzBV1vRYAcjjLCEj64EOc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "815294600166-d5ovkeu6savf46bni2sgqaaja5m3naoj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

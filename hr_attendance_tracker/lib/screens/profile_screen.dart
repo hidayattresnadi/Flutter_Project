@@ -1,8 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:hr_attendance_tracker/models/profile_model.dart';
-import 'package:hr_attendance_tracker/providers/profile_provider.dart';
+import 'package:hr_attendance_tracker/models/employee_model.dart';
+import 'package:hr_attendance_tracker/providers/employee_provider.dart';
 import 'package:hr_attendance_tracker/routes.dart';
 import 'package:provider/provider.dart';
 
@@ -14,19 +12,19 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final profile = context.watch<ProfileFormProvider>().profileData;
+    final employee = context.watch<EmployeeProvider>().employee;
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
           children: [
-            buildProfileSection(profile),
+            buildProfileSection(employee),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                buildProfileInfo(profile),
+                buildProfileInfo(employee),
                 buildAdditionalInfo(),
                 Divider(height: 0, thickness: 2),
-                buildProfileBio(profile),
+                buildProfileBio(employee),
               ],
             ),
           ],
@@ -46,20 +44,25 @@ Widget buildCoverProfile() {
   return Container(height: 210, color: Color(0xFF004966));
 }
 
-Widget buildProfileHeader(Profile profile) {
+Widget buildProfileHeader(Employee? employee) {
   return Column(
     children: [
       CircleAvatar(
         radius: 55,
-        backgroundImage: profile.profilePhoto.startsWith('assets/')
-            ? AssetImage(profile.profilePhoto) as ImageProvider
-            : FileImage(File(profile.profilePhoto)),
+        backgroundImage:
+            (employee?.profilePhoto != null &&
+                employee!.profilePhoto!.isNotEmpty)
+            ? NetworkImage(employee.profilePhoto!)
+            : null,
+        child: employee?.profilePhoto == null
+            ? const Icon(Icons.person, size: 55)
+            : null,
       ),
       SizedBox(height: 15),
       Column(
         children: [
           Text(
-            profile.fullName,
+            employee!.fullName,
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -69,7 +72,7 @@ Widget buildProfileHeader(Profile profile) {
             overflow: TextOverflow.visible,
           ),
           Text(
-            profile.position,
+            employee.position ?? "Not specified",
             style: TextStyle(
               fontSize: 18,
               color: Colors.white,
@@ -82,11 +85,11 @@ Widget buildProfileHeader(Profile profile) {
   );
 }
 
-Widget buildProfileSection(profile) {
+Widget buildProfileSection(Employee? employee) {
   return Stack(
     clipBehavior: Clip.none,
     alignment: Alignment.center,
-    children: [buildCoverProfile(), buildProfileHeader(profile)],
+    children: [buildCoverProfile(), buildProfileHeader(employee)],
   );
 }
 
@@ -130,7 +133,7 @@ Widget buildAdditionalInfo() {
   );
 }
 
-Widget buildProfileInfo(profile) {
+Widget buildProfileInfo(Employee? employee) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -148,28 +151,28 @@ Widget buildProfileInfo(profile) {
       ),
       buildReusableColumn(
         icon: Icons.business,
-        label: profile.department,
+        label: employee?.department ?? "Not specified",
         padding: 25.0,
         topPadding: 10.0,
       ),
       Divider(height: 0, thickness: 2),
       buildReusableColumn(
         icon: Icons.email,
-        label: profile.email,
+        label: employee?.email ?? "Not specified",
         padding: 25.0,
         topPadding: 25.0,
       ),
       Divider(height: 0, thickness: 2),
       buildReusableColumn(
         icon: Icons.phone,
-        label: profile.phone,
+        label: employee?.phone ?? "Not specified",
         padding: 25.0,
         topPadding: 25.0,
       ),
       Divider(height: 0, thickness: 2),
       buildReusableColumn(
         icon: Icons.location_on,
-        label: profile.location,
+        label: employee?.location ?? "Not specified",
         padding: 25.0,
         topPadding: 25.0,
       ),
@@ -178,7 +181,7 @@ Widget buildProfileInfo(profile) {
   );
 }
 
-Widget buildProfileBio(profile) {
+Widget buildProfileBio(Employee? employee) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -205,7 +208,12 @@ Widget buildProfileBio(profile) {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Column(
-              children: [Text(profile.bio, style: TextStyle(fontSize: 16))],
+              children: [
+                Text(
+                  employee?.bio ?? "Not specified",
+                  style: TextStyle(fontSize: 16),
+                ),
+              ],
             ),
           ],
         ),

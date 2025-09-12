@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hr_attendance_tracker/models/menu_model.dart';
 import 'package:hr_attendance_tracker/providers/attendance_record_provider.dart';
-import 'package:hr_attendance_tracker/providers/profile_provider.dart';
+import 'package:hr_attendance_tracker/providers/employee_provider.dart';
 import 'package:hr_attendance_tracker/screens/attendance_history.dart';
 import 'package:hr_attendance_tracker/widgets/carousel_add.dart';
 import 'package:hr_attendance_tracker/widgets/clock_in_button.dart';
@@ -35,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final profile = context.watch<ProfileFormProvider>().profileData;
+    final employee = context.watch<EmployeeProvider>().employee;
     final attendanceProvider = context.watch<AttendanceRecordProvider>();
     final listAttendanceRecords = attendanceProvider.lastRecord;
 
@@ -73,8 +73,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           Icon(Icons.waving_hand_rounded, color: Colors.yellow),
                         ],
                       ),
-                      const Text(
-                        'Dayat.',
+                      Text(
+                        '${employee?.fullName}.',
                         style: TextStyle(
                           fontSize: 30,
                           fontWeight: FontWeight.bold,
@@ -94,9 +94,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 CircleAvatar(
                   radius: 45,
-                  backgroundImage: profile.profilePhoto.startsWith('assets/')
-                      ? AssetImage(profile.profilePhoto) as ImageProvider
-                      : FileImage(File(profile.profilePhoto)),
+                  backgroundImage:
+                      (employee?.profilePhoto != null &&
+                          employee!.profilePhoto!.isNotEmpty)
+                      ? NetworkImage(employee.profilePhoto!)
+                      : null,
+                  child: employee?.profilePhoto == null
+                      ? const Icon(Icons.person, size: 55)
+                      : null,
                 ),
               ],
             ),

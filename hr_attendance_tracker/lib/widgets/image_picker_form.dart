@@ -38,6 +38,29 @@ class _ImagePickerExampleState extends State<ImagePickerExample> {
   @override
   Widget build(BuildContext context) {
     final double size = 120;
+
+    ImageProvider? imageProvider;
+
+    if (_image != null) {
+      // kalau ada file lokal, pakai FileImage
+      imageProvider = FileImage(_image!);
+    } else if (widget.initialImage != null) {
+      // kalau ada link awal
+      if (widget.initialImage!.startsWith('http')) {
+        // URL dari Supabase
+        imageProvider = NetworkImage(widget.initialImage!);
+      } else if (widget.initialImage!.startsWith('assets/')) {
+        imageProvider = AssetImage(widget.initialImage!);
+      } else {
+        // fallback ke file lokal
+        imageProvider = FileImage(File(widget.initialImage!));
+      }
+    } else {
+      // fallback ke default asset
+      // imageProvider = const AssetImage('assets/images/profile.jpg');
+      imageProvider = null;
+    }
+
     return Center(
       child: Stack(
         children: [
@@ -45,13 +68,10 @@ class _ImagePickerExampleState extends State<ImagePickerExample> {
           CircleAvatar(
             radius: size / 2,
             backgroundColor: Colors.grey[200],
-            backgroundImage: _image != null
-                ? FileImage(_image!)
-                : widget.initialImage != null
-                ? (widget.initialImage!.startsWith('assets/')
-                      ? AssetImage(widget.initialImage!) as ImageProvider
-                      : FileImage(File(widget.initialImage!)))
-                : const AssetImage('assets/images/profile.jpg'),
+            backgroundImage: imageProvider,
+            child: imageProvider == null
+                ? const Icon(Icons.person, size: 55)
+                : null,
           ),
 
           // Edit button (bottom right)

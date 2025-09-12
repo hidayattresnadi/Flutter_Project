@@ -1,133 +1,57 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hr_attendance_tracker/providers/app_auth_provider.dart';
-import 'package:hr_attendance_tracker/providers/attendance_record_provider.dart';
 import 'package:hr_attendance_tracker/providers/employee_provider.dart';
 import 'package:hr_attendance_tracker/routes.dart';
-import 'package:hr_attendance_tracker/screens/admin/admin_main_screen.dart';
-import 'package:hr_attendance_tracker/screens/login_screen.dart';
-import 'package:provider/provider.dart';
-import 'package:hr_attendance_tracker/screens/attendance_history.dart';
-import 'package:hr_attendance_tracker/screens/home_screen.dart';
+import 'package:hr_attendance_tracker/screens/admin/admin_dashboard.dart';
+import 'package:hr_attendance_tracker/screens/admin/register_employee.dart';
+import 'package:hr_attendance_tracker/screens/edit_profile_screen.dart';
+import 'package:hr_attendance_tracker/screens/forbidden_page_screen.dart';
 import 'package:hr_attendance_tracker/screens/profile_screen.dart';
 import 'package:intl/intl.dart';
-import 'package:supabase_flutter/supabase_flutter.dart' as sb;
-import 'package:firebase_auth/firebase_auth.dart' as fb;
+import 'package:provider/provider.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: '.env');
-
-  await Firebase.initializeApp(
-    options: FirebaseOptions(
-      projectId: dotenv.env['PROJECT_ID']!,
-      messagingSenderId: dotenv.env['MESSAGING_SENDER_ID']!, //Project Number
-      apiKey: dotenv.env['API_KEY']!, //Web API Key
-      appId: dotenv.env['APP_ID']!, // App ID
-    ),
-  );
-
-  await sb.Supabase.initialize(
-    url: dotenv.env['URL_SUPABASE']!,
-    anonKey: dotenv.env['API_KEY_SUPABASE']!,
-  );
-
-  // await sb.Supabase.initialize(
-  //   url: 'https://zdklzrfvstrhoioffvnh.supabase.co',
-  //   anonKey:
-  //       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpka2x6cmZ2c3RyaG9pb2Zmdm5oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc2NDA0MzEsImV4cCI6MjA3MzIxNjQzMX0.rbDs926PC3rMqDPcHDmA9vFhampLvuuveew48n64Bek",
-  // );
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => AttendanceRecordProvider()),
-        ChangeNotifierProvider(create: (_) => EmployeeProvider()),
-        ChangeNotifierProvider(create: (_) => AppAuthProvider()),
-      ],
-      child: MyApp(),
-    ),
-  );
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class AdminMainScreen extends StatefulWidget {
+  const AdminMainScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: AuthWrapper(),
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
-      ),
-      onGenerateRoute: AppRoutes.generateRoute,
-    );
-  }
+  State<AdminMainScreen> createState() => _AdminMainScreenState();
 }
 
-class AuthWrapper extends StatelessWidget {
-  const AuthWrapper({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<fb.User?>(
-      stream: fb.FirebaseAuth.instance.authStateChanges(),
-      builder: (context, snapshot) {
-        final employeeProvider = Provider.of<EmployeeProvider>(
-          context,
-          listen: false,
-        );
-
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (snapshot.hasData) {
-          // semisal nutup aplikasi tanpa log out
-          if (employeeProvider.employee == null) {
-            return const LoginScreen();
-          }
-
-          if (employeeProvider.employee!.role == "admin") {
-            return const AdminMainScreen();
-          } else {
-            return const MainScreen();
-          }
-        }
-
-        return const LoginScreen();
-      },
-    );
-  }
-}
-
-final PageController _pageController = PageController();
-
-class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
-  @override
-  State<MainScreen> createState() => _MainScreenState();
-}
-
-class _MainScreenState extends State<MainScreen> {
+class _AdminMainScreenState extends State<AdminMainScreen> {
   int _currentIndex = 1;
+  late PageController _pageController;
 
-  final List<Widget> _screens = [
-    HomeScreen(),
-    ProfileScreen(),
-    AttendanceHistoryScreen(),
-  ];
-  final List<String> _titles = ['Home', 'Profile', 'Attendance History'];
+  final List<String> _titles = ['Profile', 'Admin Dashboard', 'Settings'];
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: 1);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final employee = context.watch<EmployeeProvider>().employee;
     final authProvider = Provider.of<AppAuthProvider>(context);
+    final role = Provider.of<EmployeeProvider>(context).employee?.role;
+    final employee = context.watch<EmployeeProvider>().employee;
+    final screens = [
+      ProfileScreen(),
+      AdminDashboardScreen(),
+      RegisterUserScreen(),
+    ];
+
+    if (role != "admin") {
+      return ForbiddenPage();
+    }
+
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.amber.shade900,
         title: Row(
@@ -160,13 +84,10 @@ class _MainScreenState extends State<MainScreen> {
       body: PageView(
         controller: _pageController,
         onPageChanged: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
+          setState(() => _currentIndex = index);
         },
-        children: _screens, // list of widgets
+        children: screens,
       ),
-
       bottomNavigationBar: Theme(
         data: Theme.of(context).copyWith(
           splashColor: Colors.transparent,
@@ -189,15 +110,19 @@ class _MainScreenState extends State<MainScreen> {
             );
           },
           items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
             BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
             BottomNavigationBarItem(
-              icon: Icon(Icons.assignment_turned_in_sharp),
-              label: 'Attendance History',
+              icon: Icon(Icons.people),
+              label: 'Manage Users',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.app_registration), // ikon register
+              label: 'Register',
             ),
           ],
         ),
       ),
+
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
