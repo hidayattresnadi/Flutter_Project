@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:my_portfolio_app/main.dart';
 import 'package:my_portfolio_app/screens/about_screen.dart';
 import 'package:my_portfolio_app/screens/add_portfolio_form.dart';
 import 'package:my_portfolio_app/screens/admin/add_user_screen.dart';
-import 'package:my_portfolio_app/screens/admin/admin_dashboard.dart';
 import 'package:my_portfolio_app/screens/admin/admin_main_screen.dart';
 import 'package:my_portfolio_app/screens/edit_profile_screen.dart';
 import 'package:my_portfolio_app/screens/login_screen.dart';
+import 'package:my_portfolio_app/screens/main_screen.dart';
 import 'package:my_portfolio_app/screens/portfolio_screen.dart';
 import 'package:my_portfolio_app/screens/register_screen.dart';
 import 'package:my_portfolio_app/screens/settings_screen.dart';

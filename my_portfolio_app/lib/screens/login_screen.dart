@@ -30,7 +30,12 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset("assets/uag_logo.png", height: 100),
+              Icon(
+                Icons.web,
+                color: Theme.of(context).colorScheme.primary,
+                size: 125.0,
+              ),
+              // Image.asset("assets/web_logo.png", height: 125),
               const SizedBox(height: 20),
 
               // EMAIL INPUT

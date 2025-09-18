@@ -25,6 +25,8 @@ class ProfileProvider extends ChangeNotifier {
   final TextEditingController addressController = TextEditingController();
   final TextEditingController bioController = TextEditingController();
   final TextEditingController photoController = TextEditingController();
+  final TextEditingController linkedInController = TextEditingController();
+  final TextEditingController githubController = TextEditingController();
 
   // load profile from Firestore
   Future<void> loadProfile(String uid) async {
@@ -69,6 +71,8 @@ class ProfileProvider extends ChangeNotifier {
     addressController.text = profileData.address ?? '';
     bioController.text = profileData.bio ?? '';
     photoController.text = profileData.photo ?? '';
+    githubController.text = profileData.github ?? '';
+    linkedInController.text = profileData.linkedIn ?? '';
   }
 
   // get all data from API
@@ -106,6 +110,8 @@ class ProfileProvider extends ChangeNotifier {
         bio: bioController.text,
         photo: photoController.text,
         role: _profile!.role,
+        github: githubController.text,
+        linkedIn: linkedInController.text,
       );
 
       await _profileService.updateUserProfile(updated);
@@ -138,6 +144,8 @@ class ProfileProvider extends ChangeNotifier {
         bio: bioController.text,
         photo: photoController.text,
         role: _editUser!.role,
+        github: githubController.text,
+        linkedIn: linkedInController.text,
       );
 
       await _profileService.updateUserProfile(updated);
@@ -194,6 +202,8 @@ class ProfileProvider extends ChangeNotifier {
     addressController.dispose();
     bioController.dispose();
     photoController.dispose();
+    githubController.dispose();
+    linkedInController.dispose();
     super.dispose();
   }
 }

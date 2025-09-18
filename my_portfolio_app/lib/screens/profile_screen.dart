@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:my_portfolio_app/provider/profile_provider.dart';
 import 'package:my_portfolio_app/routes.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -22,6 +24,7 @@ class ProfileScreen extends StatelessWidget {
                 profile?.profession,
                 profile?.photo,
               ),
+
               Divider(height: 24),
               buildMyPortfolio(context),
               SizedBox(height: 30),
@@ -29,6 +32,13 @@ class ProfileScreen extends StatelessWidget {
                 profile?.email,
                 profile?.phone,
                 profile?.address,
+              ),
+              SizedBox(height: 20),
+              buildSocialLinks(
+                context,
+                profile?.email,
+                profile?.linkedIn,
+                profile?.github,
               ),
               SizedBox(height: 30),
               buildProfileBio(profile?.bio),
@@ -227,6 +237,116 @@ Widget buildReusableColumn({
           ),
         ),
       ],
+    ),
+  );
+}
+
+Widget buildSocialLinks(
+  BuildContext context,
+  String? email,
+  String? linkedIn,
+  String? github,
+) {
+  final String githubUrl = 'https://github.com/$github';
+  final String emailLink = 'mailto:$email';
+
+  Future<void> launchLink(String url) async {
+    final Uri uri = Uri.parse(url);
+    if (!await launchUrl(uri)) {
+      throw 'Could not launch $url';
+    }
+  }
+
+  return Card(
+    color: Colors.black,
+    elevation: 4,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      child: Row(
+        children: [
+          const Expanded(
+            child: Text(
+              "Social Links",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          Row(
+            children: [
+              IconButton(
+                icon: const FaIcon(
+                  FontAwesomeIcons.github,
+                  color: Colors.white,
+                ),
+                tooltip: 'GitHub',
+                onPressed: () {
+                  if (github != null) {
+                    launchLink(githubUrl);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Please add your github',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        backgroundColor: Colors.red,
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                  }
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.email, color: Colors.redAccent),
+                tooltip: 'Email',
+                onPressed: () {
+                  if (email != null) {
+                    launchLink(emailLink);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Please add your email',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        backgroundColor: Colors.red,
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                  }
+                },
+              ),
+              IconButton(
+                icon: const FaIcon(
+                  FontAwesomeIcons.linkedin,
+                  color: Colors.lightBlueAccent,
+                ),
+                tooltip: 'LinkedIn',
+                onPressed: () {
+                  if (linkedIn != null) {
+                    launchLink(linkedIn);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Please add your linkedIn url',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        backgroundColor: Colors.red,
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                  }
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
     ),
   );
 }

@@ -97,6 +97,14 @@ class FormScreenState extends State<EditProfileScreen> {
                     controller: profileFormProvider.photoController,
                     label: 'Edit photo url',
                   ),
+                  buildFormTextField(
+                    controller: profileFormProvider.githubController,
+                    label: 'Edit github username',
+                  ),
+                  buildFormTextField(
+                    controller: profileFormProvider.linkedInController,
+                    label: 'Edit linkedIn link',
+                  ),
                   Center(
                     child: ElevatedButton(
                       onPressed: () async {

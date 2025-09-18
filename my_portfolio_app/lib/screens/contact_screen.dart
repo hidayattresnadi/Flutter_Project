@@ -117,12 +117,14 @@ Widget buildPaddingContact({
           children: [
             Icon(icon, color: color, size: 30),
             SizedBox(width: 40),
-            Text(
-              info,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+            Expanded(
+              child: Text(
+                info,
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
             ),
           ],

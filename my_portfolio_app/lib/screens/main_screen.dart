@@ -1,31 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:my_portfolio_app/provider/app_auth_provider.dart';
-import 'package:my_portfolio_app/provider/profile_provider.dart';
 import 'package:my_portfolio_app/routes.dart';
-import 'package:my_portfolio_app/screens/admin/admin_dashboard.dart';
 import 'package:my_portfolio_app/screens/contact_screen.dart';
 import 'package:my_portfolio_app/screens/edit_profile_screen.dart';
-import 'package:my_portfolio_app/screens/forbidden_screen.dart';
+import 'package:my_portfolio_app/screens/portfolio_screen.dart';
 import 'package:my_portfolio_app/screens/profile_screen.dart';
 import 'package:provider/provider.dart';
 
-class AdminMainScreen extends StatefulWidget {
-  const AdminMainScreen({super.key});
-
+class MainScreen extends StatefulWidget {
+  final int initialIndex;
+  const MainScreen({super.key, this.initialIndex = 0});
   @override
-  State<AdminMainScreen> createState() => _AdminMainScreenState();
+  State<MainScreen> createState() => _MainScreenState();
 }
 
-class _AdminMainScreenState extends State<AdminMainScreen> {
-  int _currentIndex = 1;
+class _MainScreenState extends State<MainScreen> {
+  late int _currentIndex;
+  int _portfolioTabIndex = 0; // <- simpan index tab portfolio
   late PageController _pageController;
-
-  final List<String> _titles = ['Profile', 'Admin Dashboard', 'My Contact'];
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(initialPage: 1);
+    _currentIndex = widget.initialIndex;
+    _pageController = PageController(initialPage: _currentIndex);
   }
 
   @override
@@ -34,17 +32,25 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
     super.dispose();
   }
 
+  final List<String> _titles = ['Profile', 'My Portfolio', 'My Contact'];
+
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AppAuthProvider>(context);
-    final role = Provider.of<ProfileProvider>(context).profile?.role;
-    final screens = [ProfileScreen(), AdminDashboardScreen(), ContactScreen()];
-
-    if (role != "admin") {
-      return ForbiddenPage();
-    }
-
+    final List<Widget> screens = [
+      ProfileScreen(),
+      PortfolioScreen(
+        withScaffold: false,
+        onTabChanged: (index) {
+          setState(() {
+            _portfolioTabIndex = index;
+          });
+        },
+      ),
+      ContactScreen(),
+    ];
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
           _titles[_currentIndex],
@@ -69,28 +75,32 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
       body: PageView(
         controller: _pageController,
         onPageChanged: (index) {
-          setState(() => _currentIndex = index);
+          setState(() {
+            _currentIndex = index;
+            if (index == 1) {
+              _portfolioTabIndex = 0; // reset ke tab awal
+            }
+          });
         },
-        children: screens,
+        children: screens, // list of widgets
       ),
-      floatingActionButton: _currentIndex == 1
-          ? FloatingActionButton(
-              onPressed: () {
-                Navigator.pushNamed(context, AppRoutes.registerUser);
-              },
-              child: const Icon(Icons.add),
-            )
-          : null,
+
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
+        selectedItemColor: Theme.of(context).colorScheme.primary,
+        unselectedItemColor: Colors.grey,
         onTap: (index) {
-          _pageController.jumpToPage(index);
+          _pageController.animateToPage(
+            index,
+            duration: Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+          );
         },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
           BottomNavigationBarItem(
-            icon: Icon(Icons.people),
-            label: 'Manage Users',
+            icon: Icon(Icons.work),
+            label: 'My Portfolio',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.contact_mail),
@@ -98,7 +108,14 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
           ),
         ],
       ),
-
+      floatingActionButton: _currentIndex == 1 && _portfolioTabIndex == 0
+          ? FloatingActionButton(
+              onPressed: () {
+                Navigator.pushNamed(context, AppRoutes.addPortfolio);
+              },
+              child: const Icon(Icons.add),
+            )
+          : null,
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
@@ -126,18 +143,10 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
               leading: Icon(Icons.logout_outlined),
               title: Text('Log Out'),
               onTap: () async {
-                // final profileProvider = Provider.of<ProfileProvider>(
-                //   context,
-                //   listen: false,
-                // );
-                // profileProvider.clearProfile();
                 await authProvider.signOut();
-
-                Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  AppRoutes.login,
-                  (route) => false, // clear navigation stack
-                );
+                if (context.mounted) {
+                  Navigator.pushReplacementNamed(context, AppRoutes.login);
+                }
               },
             ),
           ],

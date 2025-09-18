@@ -8,6 +8,8 @@ class Profile {
   final String? bio;
   final String? photo; // simpan path foto (String)
   final String role; // 'admin' atau 'member'
+  final String? github;
+  final String? linkedIn;
 
   Profile({
     required this.uid,
@@ -19,6 +21,8 @@ class Profile {
     this.address,
     this.bio,
     this.photo,
+    this.github,
+    this.linkedIn,
   });
   Map<String, dynamic> toMap() {
     return {
@@ -32,6 +36,8 @@ class Profile {
       'photo': photo,
       'role': role,
       'createdAt': DateTime.now(),
+      'github': github,
+      'linkedIn': linkedIn,
     };
   }
 
@@ -46,6 +52,8 @@ class Profile {
       bio: map['bio'],
       photo: map['photo'],
       role: map['role'] ?? 'member',
+      github: map['github'],
+      linkedIn: map['linkedIn'],
     );
   }
 }

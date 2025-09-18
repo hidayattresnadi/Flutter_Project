@@ -6,8 +6,17 @@ import 'package:my_portfolio_app/routes.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 Widget buildProjectCard(BuildContext context, Project project) {
+  Future<void> launchLink(String url) async {
+    final Uri uri = Uri.parse(url);
+    if (!await launchUrl(uri)) {
+      throw 'Could not launch $url';
+    }
+  }
+
   return Card(
     elevation: 4,
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -56,7 +65,7 @@ Widget buildProjectCard(BuildContext context, Project project) {
             style: GoogleFonts.roboto(
               fontSize: 18,
               height: 1.4,
-              fontWeight: FontWeight.w600, // lebih tebal dari default
+              fontWeight: FontWeight.w600,
               color: Colors.black87,
             ),
           ),
@@ -75,7 +84,9 @@ Widget buildProjectCard(BuildContext context, Project project) {
               padding: const EdgeInsets.only(top: 8),
               child: GestureDetector(
                 onTap: () {
-                  // Bisa tambahkan logic buka URL
+                  if (project.link != null) {
+                    launchLink(project.link ?? '');
+                  }
                 },
                 child: Text(
                   project.link!,
@@ -88,6 +99,30 @@ Widget buildProjectCard(BuildContext context, Project project) {
                 ),
               ),
             ),
+          const SizedBox(height: 40),
+          Center(
+            child: SizedBox(
+              width: 220,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  if (project.link != null) {
+                    final String shareText =
+                        'Check out my project: ${project.title}\n\nGitHub Link: ${project.link}';
+                    Share.share(shareText, subject: "My Portfolio");
+                  }
+                },
+                icon: const Icon(Icons.share, color: Colors.white),
+                label: const Text(
+                  "Share Link",
+                  style: TextStyle(color: Colors.white, fontSize: 16.0),
+                ),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  backgroundColor: Colors.blue,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     ),
