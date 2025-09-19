@@ -5,7 +5,6 @@ import 'package:hr_attendance_tracker/providers/employee_provider.dart';
 import 'package:hr_attendance_tracker/routes.dart';
 import 'package:hr_attendance_tracker/screens/admin/admin_dashboard.dart';
 import 'package:hr_attendance_tracker/screens/admin/register_employee.dart';
-import 'package:hr_attendance_tracker/screens/edit_profile_screen.dart';
 import 'package:hr_attendance_tracker/screens/forbidden_page_screen.dart';
 import 'package:hr_attendance_tracker/screens/profile_screen.dart';
 import 'package:intl/intl.dart';

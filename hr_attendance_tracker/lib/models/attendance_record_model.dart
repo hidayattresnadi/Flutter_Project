@@ -7,7 +7,13 @@ class AttendanceRecord {
   String checkIn;
   String checkOut;
   String status;
-  int employeeId;
+  String employeeId;
+  String? clockInPhotoUrl;
+  String? clockOutPhotoUrl;
+  double? clockInLatitude;
+  double? clockInLongitude;
+  double? clockOutLatitude;
+  double? clockOutLongitude;
 
   AttendanceRecord({
     this.id,
@@ -17,6 +23,12 @@ class AttendanceRecord {
     required this.checkOut,
     required this.status,
     required this.employeeId,
+    this.clockInPhotoUrl,
+    this.clockOutPhotoUrl,
+    this.clockInLatitude,
+    this.clockInLongitude,
+    this.clockOutLatitude,
+    this.clockOutLongitude,
   });
 
   String get workDuration {
@@ -77,7 +89,7 @@ class AttendanceRecord {
     return progress.clamp(0.0, 1.0);
   }
 
-  // Fungsi untuk mengubah data JSON menjadi objek Todo
+  // Fungsi untuk mengubah data JSON menjadi objek Attendance
   factory AttendanceRecord.fromJson(Map<String, dynamic> json) {
     return AttendanceRecord(
       id: json['attendance_id'],
@@ -87,6 +99,12 @@ class AttendanceRecord {
       checkOut: json['check_out'],
       status: json['status'],
       employeeId: json['employee_id'],
+      clockInPhotoUrl: json['clock_in_photo_url'],
+      clockOutPhotoUrl: json['clock_out_photo_url'],
+      clockInLatitude: json['clock_in_latitude'],
+      clockInLongitude: json['clock_in_longitude'],
+      clockOutLatitude: json['clock_out_latitude'],
+      clockOutLongitude: json['clock_out_longitude'],
     );
   }
   // Fungsi untuk mengubah objek attendance menjadi format JSON
@@ -97,7 +115,13 @@ class AttendanceRecord {
       'check_in': checkIn,
       'check_out': checkOut,
       'status': status,
-      'employee_id': 1,
+      'employee_id': employeeId,
+      'clock_in_photo_url': clockInPhotoUrl,
+      'clock_out_photo_url': clockOutPhotoUrl,
+      'clock_in_latitude': clockInLatitude,
+      'clock_in_longitude': clockInLongitude,
+      'clock_out_latitude': clockOutLatitude,
+      'clock_out_longitude': clockOutLongitude,
     };
   }
 }

@@ -1,13 +1,15 @@
+import 'package:camera/camera.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hr_attendance_tracker/providers/app_auth_provider.dart';
 import 'package:hr_attendance_tracker/providers/attendance_record_provider.dart';
 import 'package:hr_attendance_tracker/providers/employee_provider.dart';
 import 'package:hr_attendance_tracker/routes.dart';
 import 'package:hr_attendance_tracker/screens/admin/admin_main_screen.dart';
-import 'package:hr_attendance_tracker/screens/login_screen.dart';
+import 'package:hr_attendance_tracker/screens/splash_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:hr_attendance_tracker/screens/attendance_history.dart';
 import 'package:hr_attendance_tracker/screens/home_screen.dart';
@@ -17,7 +19,11 @@ import 'package:supabase_flutter/supabase_flutter.dart' as sb;
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  late List<CameraDescription> cameras;
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+  cameras = await availableCameras();
   await dotenv.load(fileName: '.env');
 
   await Firebase.initializeApp(
@@ -41,13 +47,23 @@ void main() async {
         ChangeNotifierProvider(create: (_) => EmployeeProvider()),
         ChangeNotifierProvider(create: (_) => AppAuthProvider()),
       ],
-      child: MyApp(),
+      child: MyApp(cameras: cameras),
     ),
   );
+
+  // // //beri waktu splash screen 2 detik
+
+  // await Future.delayed(const Duration(seconds: 2));
+
+  // // // hapus splash screen dengan function remove()
+
+  FlutterNativeSplash.remove();
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final List<CameraDescription>? cameras;
+
+  const MyApp({super.key, this.cameras});
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +74,8 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      onGenerateRoute: AppRoutes.generateRoute,
+      onGenerateRoute: (settings) =>
+          AppRoutes.generateRoute(settings, cameras!),
     );
   }
 }
@@ -83,7 +100,7 @@ class AuthWrapper extends StatelessWidget {
         if (snapshot.hasData) {
           // semisal nutup aplikasi tanpa log out
           if (employeeProvider.employee == null) {
-            return const LoginScreen();
+            return const SplashScreen();
           }
 
           if (employeeProvider.employee!.role == "admin") {
@@ -93,7 +110,7 @@ class AuthWrapper extends StatelessWidget {
           }
         }
 
-        return const LoginScreen();
+        return const SplashScreen();
       },
     );
   }
@@ -108,7 +125,7 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _currentIndex = 1;
+  int _currentIndex = 0;
 
   final List<Widget> _screens = [
     HomeScreen(),

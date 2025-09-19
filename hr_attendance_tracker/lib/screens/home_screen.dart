@@ -1,11 +1,9 @@
-import 'dart:io';
-
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hr_attendance_tracker/models/menu_model.dart';
 import 'package:hr_attendance_tracker/providers/attendance_record_provider.dart';
 import 'package:hr_attendance_tracker/providers/employee_provider.dart';
+import 'package:hr_attendance_tracker/routes.dart';
 import 'package:hr_attendance_tracker/screens/attendance_history.dart';
 import 'package:hr_attendance_tracker/widgets/carousel_add.dart';
 import 'package:hr_attendance_tracker/widgets/clock_in_button.dart';
@@ -28,8 +26,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadData() {
     final provider = context.read<AttendanceRecordProvider>();
+    final employeeLoggedIn = context.read<EmployeeProvider>().employee;
 
-    return provider.fetchAttendances(); // All
+    if (employeeLoggedIn?.employeeId == null) {
+      return Future.value();
+    }
+
+    return provider.fetchAttendances(employeeLoggedIn!.employeeId); // All
   }
 
   @override
@@ -144,27 +147,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     if (!context.mounted) return;
                     if (shouldUpdate == true) {
-                      bool success = await context
-                          .read<AttendanceRecordProvider>()
-                          .addAttendance();
-                      if (success) {
-                        Fluttertoast.showToast(
-                          msg: 'success clock in',
-                          backgroundColor: Colors.green,
-                          textColor: Colors.white,
-                        );
-                      } else {
-                        if (context.mounted) {
-                          final errorMessage = context
-                              .read<AttendanceRecordProvider>()
-                              .errorMessage;
-                          Fluttertoast.showToast(
-                            msg: '$errorMessage',
-                            backgroundColor: Colors.red,
-                            textColor: Colors.white,
-                          );
-                        }
-                      }
+                      Navigator.pushNamed(context, AppRoutes.selfieScreen);
                     }
                   }
                 },
@@ -218,25 +201,31 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   if (!context.mounted) return;
                   if (shouldUpdate == true) {
-                    bool success = await context
-                        .read<AttendanceRecordProvider>()
-                        .updateAttandance();
-                    if (success) {
-                      Fluttertoast.showToast(
-                        msg: 'success clock out',
-                        backgroundColor: Colors.green,
-                        textColor: Colors.white,
-                      );
-                    } else {
-                      final errorMessage = context
-                          .read<AttendanceRecordProvider>()
-                          .errorMessage;
-                      Fluttertoast.showToast(
-                        msg: '$errorMessage',
-                        backgroundColor: Colors.red,
-                        textColor: Colors.white,
-                      );
-                    }
+                    Navigator.pushNamed(
+                      context,
+                      AppRoutes.selfieScreen,
+                      arguments: true, // kirim flag isClockOut
+                    );
+
+                    // bool success = await context
+                    //     .read<AttendanceRecordProvider>()
+                    //     .updateAttandance(employee!.employeeId);
+                    // if (success) {
+                    //   Fluttertoast.showToast(
+                    //     msg: 'success clock out',
+                    //     backgroundColor: Colors.green,
+                    //     textColor: Colors.white,
+                    //   );
+                    // } else {
+                    //   final errorMessage = context
+                    //       .read<AttendanceRecordProvider>()
+                    //       .errorMessage;
+                    //   Fluttertoast.showToast(
+                    //     msg: '$errorMessage',
+                    //     backgroundColor: Colors.red,
+                    //     textColor: Colors.white,
+                    //   );
+                    // }
                   }
                 },
               ),

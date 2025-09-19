@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hr_attendance_tracker/models/attendance_record_model.dart';
 import 'package:hr_attendance_tracker/providers/attendance_record_provider.dart';
+import 'package:hr_attendance_tracker/providers/employee_provider.dart';
+import 'package:hr_attendance_tracker/routes.dart';
 import 'package:hr_attendance_tracker/screens/tab_attendance_screen/attendance_tab.dart';
 import 'package:hr_attendance_tracker/screens/tab_attendance_screen/shift_tab.dart';
 import 'package:hr_attendance_tracker/widgets/month_dropdown.dart';
@@ -31,7 +33,7 @@ class AttendanceItem extends StatelessWidget {
         children: [
           // DATE
           Expanded(
-            flex: 2,
+            flex: 1,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -68,10 +70,10 @@ class AttendanceItem extends StatelessWidget {
                 AutoSizeText(
                   record.checkIn,
                   group: inTimeGroup,
-                  minFontSize: 10,
+                  minFontSize: 12,
                   maxFontSize: 13,
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.poppins(),
+                  style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 4),
                 const SizedBox(height: 16), // Placeholder biar sejajar
@@ -91,10 +93,10 @@ class AttendanceItem extends StatelessWidget {
                 AutoSizeText(
                   record.checkOut,
                   group: inTimeGroup,
-                  minFontSize: 10,
+                  minFontSize: 12,
                   maxFontSize: 13,
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.poppins(fontWeight: FontWeight.normal),
+                  style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 4),
                 const SizedBox(height: 16),
@@ -105,29 +107,50 @@ class AttendanceItem extends StatelessWidget {
           const SizedBox(width: 8),
 
           // STATUS
+          // Expanded(
+          //   flex: 1,
+          //   child: Column(
+          //     mainAxisAlignment: MainAxisAlignment.center,
+          //     children: [
+          //       if (record.status != 'status')
+          //         Icon(
+          //           record.status == 'Present'
+          //               ? Icons.check_circle
+          //               : Icons.cancel,
+          //           size: 18,
+          //           color: record.status == 'Present'
+          //               ? Colors.green
+          //               : Colors.red,
+          //         ),
+          //       const SizedBox(height: 4),
+          //       AutoSizeText(
+          //         record.status,
+          //         group: dateGroup, // Pisah group untuk status
+          //         minFontSize: 10,
+          //         maxFontSize: 16,
+          //         style: GoogleFonts.poppins(fontWeight: FontWeight.normal),
+          //       ),
+          //     ],
+          //   ),
+          // ),
           Expanded(
             flex: 1,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                if (record.status != 'status')
-                  Icon(
-                    record.status == 'Present'
-                        ? Icons.check_circle
-                        : Icons.cancel,
-                    size: 18,
-                    color: record.status == 'Present'
-                        ? Colors.green
-                        : Colors.red,
-                  ),
-                const SizedBox(height: 4),
-                AutoSizeText(
-                  record.status,
-                  group: dateGroup, // Pisah group untuk status
-                  minFontSize: 10,
-                  maxFontSize: 16,
-                  style: GoogleFonts.poppins(fontWeight: FontWeight.normal),
+                IconButton(
+                  icon: const Icon(Icons.arrow_forward_ios, size: 16),
+                  onPressed: () {
+                    Navigator.pushNamed(
+                      context,
+                      AppRoutes.detailAttendancePage,
+                      arguments: record.id,
+                    );
+                  },
                 ),
+                const SizedBox(height: 4),
+                const SizedBox(height: 16),
               ],
             ),
           ),
@@ -155,8 +178,13 @@ class _AttendanceScreenState extends State<AttendanceHistoryScreen> {
 
   Future<void> _loadData() {
     final provider = context.read<AttendanceRecordProvider>();
+    final employeeLoggedIn = context.read<EmployeeProvider>().employee;
 
-    return provider.fetchAttendances(); // All
+    if (employeeLoggedIn?.employeeId == null) {
+      return Future.value();
+    }
+
+    return provider.fetchAttendances(employeeLoggedIn!.employeeId); // All
   }
 
   @override
@@ -302,7 +330,7 @@ Widget attendanceScreenBody(BuildContext context) {
                       child: Row(
                         children: const [
                           Expanded(
-                            flex: 2,
+                            flex: 1,
                             child: Text(
                               'Date',
                               style: TextStyle(fontWeight: FontWeight.bold),
@@ -327,11 +355,8 @@ Widget attendanceScreenBody(BuildContext context) {
                           ),
                           Expanded(
                             flex: 1,
-                            child: Text(
-                              'Status',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                              textAlign: TextAlign.center,
-                            ),
+                            child:
+                                SizedBox(), // biar rata dengan body yang ada panah
                           ),
                         ],
                       ),
